@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Page  
+   x:Class="ACMS_Program_Planner.StepsPage"  
+   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"  
+   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"  
+   xmlns:local="using:ACMS_Program_Planner"  
+   xmlns:models="using:ACMS_Program_Planner.Models"
+   xmlns:sys="using:System">  
+
+   <Grid>  
+       <Grid.ColumnDefinitions>  
+           <ColumnDefinition Width="0.3*" />  
+           <ColumnDefinition Width="0.7*" />  
+       </Grid.ColumnDefinitions>  
+
+       <!-- Left Column -->  
+       <StackPanel Grid.Column="0" Margin="10">  
+           <Grid Margin="0,0,0,10">  
+               <Grid.ColumnDefinitions>  
+                   <ColumnDefinition Width="*" />  
+                   <ColumnDefinition Width="Auto" />  
+               </Grid.ColumnDefinitions>
+                <TextBlock Text="Steps" VerticalAlignment="Center" Style="{StaticResource SubtitleTextBlockStyle}" Margin="10,0,0,0" Grid.Column="0" />  
+               <Button Content="Add Step" Click="AddItemButton_Click" Grid.Column="1" />  
+           </Grid>  
+           <ListView x:Name="StepsListView" SelectionChanged="StepsListView_SelectionChanged" ItemsSource="{x:Bind Steps}">  
+               <ListView.ItemTemplate>  
+                   <DataTemplate x:DataType="models:StepItem">  
+                       <StackPanel Margin="0, 5, 0, 5">
+                            <TextBlock Text="{x:Bind sys:String.Format('Step Id: {0}', Id)}" FontWeight="Bold" />
+                            <TextBlock Text="{x:Bind sys:String.Format('Name: {0}', Name), Mode=OneWay}" />
+                        </StackPanel>  
+                   </DataTemplate>  
+               </ListView.ItemTemplate>  
+           </ListView>  
+       </StackPanel>  
+
+        <!-- Right Column -->  
+        <Border Grid.Column="1" Background="{StaticResource LayerFillColorDefaultBrush}" Margin="8" CornerRadius="8">  
+           <StackPanel x:Name="FormPanel" Visibility="Collapsed" Margin="16, 32, 16, 24">
+                <TextBlock x:Name="StepId" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,24" />
+                <TextBlock Text="Name" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="0,0,0,12" />
+                <TextBox x:Name="NameTextBox" Margin="0,0,0,16" Width="250" HorizontalAlignment="Left" HorizontalContentAlignment="Left" Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock Text="Time" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="0,0,0,12" />
+                <NumberBox x:Name="DurationSecondsNumberBox" Margin="0,0,0,16" Width="150" HorizontalAlignment="Left" HorizontalContentAlignment="Left" Minimum="0" SpinButtonPlacementMode="Inline" Value="{Binding DurationSeconds, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock Text="Temperature" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="0,0,0,12" />
+                <NumberBox x:Name="FinalTemperatureNumberBox" Margin="0,0,0,16" Width="150" HorizontalAlignment="Left" HorizontalContentAlignment="Left" Minimum="0" SpinButtonPlacementMode="Inline" Value="{Binding FinalTemperature, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />  
+               <CheckBox x:Name="IsSteamerActiveCheckBox" Content="Steaming Active" Margin="0,0,0,16" IsChecked="{Binding IsSteamerActive, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock Text="Termination of Step:" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="0,0,0,12" />  
+               <CheckBox x:Name="TerminateIfTemperatureReachedCheckBox" Content="Temperature Reached" Margin="0,0,0,16" IsChecked="{Binding TerminateIfTemperatureReached, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />  
+               <CheckBox x:Name="TerminateIfTimeExpiredCheckBox" Content="Time Expired" Margin="0,0,0,16" IsChecked="{Binding TerminateIfTimeExpired, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />  
+           </StackPanel>  
+       </Border>  
+   </Grid>  
+</Page>

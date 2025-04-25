@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "ACMS_Program_Planner (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "ACMS_Program_Planner (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
