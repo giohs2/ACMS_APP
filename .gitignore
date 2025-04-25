@@ -48,3 +48,8 @@ Thumbs.db
 *.mov
 *.wmv
 
+# Visual Studio
+bin/
+obj/
+*.user
+.vs/
