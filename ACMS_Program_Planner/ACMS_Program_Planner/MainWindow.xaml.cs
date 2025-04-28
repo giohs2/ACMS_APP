@@ -52,14 +52,13 @@ namespace ACMS_Program_Planner
 
         private void MainNavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
         {
-            if (args.SelectedItem is NavigationViewItem selectedItem)
+            if (args.SelectedItemContainer.Tag.ToString() == "StepsPage")
             {
-                string pageName = selectedItem.Tag.ToString();
-                Type pageType = Type.GetType($"ACMS_Program_Planner.{pageName}");
-                if (pageType != null)
-                {
-                    ContentFrame.Navigate(pageType);
-                }
+                ContentFrame.Navigate(typeof(StepsPage));
+            }
+            else if (args.SelectedItemContainer.Tag.ToString() == "ProgramsPage")
+            {
+                ContentFrame.Navigate(typeof(ProgramsPage));
             }
         }
 

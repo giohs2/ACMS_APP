@@ -58,8 +58,7 @@ namespace ACMS_Program_Planner
         {
             IntPtr hWnd = WinRT.Interop.WindowNative.GetWindowHandle(m_window);
             var dpi = GetDpiForWindow(hWnd);
-            float scale = 1.0f + (float)(dpi - 96) / 96;
-            return scale;
+            return 1.0f + (dpi - 96) / 96.0f;
         }
 
         private Window? m_window;

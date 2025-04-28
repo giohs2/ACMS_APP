@@ -17,8 +17,8 @@ namespace ACMS_Program_Planner.Services
         private static readonly string DirectoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Ipeco", "ACMS_Program_Planner");
         private static readonly string FilePath = Path.Combine(DirectoryPath, "data.json");
 
-        public ObservableCollection<StepItem> Steps { get; }
-        public ObservableCollection<ProgramItem> Programs { get; }
+        public ObservableCollection<StepItem> Steps { get; } = new ObservableCollection<StepItem>();
+        public ObservableCollection<ProgramItem> Programs { get; } = new ObservableCollection<ProgramItem>();
         public int NextStepId { get; private set; } = 1;
         public int NextProgramId { get; private set; } = 1;
 

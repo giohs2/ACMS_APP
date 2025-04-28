@@ -42,11 +42,8 @@ namespace ACMS_Program_Planner
         private ObservableCollection<StepItem> selectedSteps { get; set; } = new ObservableCollection<StepItem>();
 
         public ObservableCollection<StepItem> SelectedSteps
-        { 
-            get
-            {
-                return selectedSteps;
-            }
+        {
+            get => selectedSteps;
             set
             {
                 selectedSteps = value;
@@ -174,25 +171,13 @@ namespace ACMS_Program_Planner
 
         private void SelectedStepsListView_DragOver(object sender, DragEventArgs e)
         {
-            e.AcceptedOperation = (e.DataView.Contains(StandardDataFormats.Text)) ? DataPackageOperation.Copy : DataPackageOperation.None;
+            e.AcceptedOperation = e.DataView.Contains(StandardDataFormats.Text) ? DataPackageOperation.Copy : DataPackageOperation.None;
         }
 
-        /*private void DeleteSelectedStepsButton_Click(object sender, RoutedEventArgs e)
-        {
-            var selectedItems = SelectedStepsListView.SelectedItems.Cast<StepItem>().ToList();
-            foreach (var item in selectedItems)
-            {
-                selectedProgram.StepIds.Remove(item.Id);
-            }
-
-            SelectedStepsListView.ItemsSource = null;
-            SelectedStepsListView.ItemsSource = SelectedSteps;
-            OnPropertyChanged(nameof(SelectedSteps)); // Notify UI of changes
-        }*/
-
+        // ...existing code...
         private void AvailableStepsListView_DragOver(object sender, DragEventArgs e)
         {
-            e.AcceptedOperation = (e.DataView.Contains(StandardDataFormats.Text)) ? DataPackageOperation.Copy : DataPackageOperation.None;
+            e.AcceptedOperation = e.DataView.Contains(StandardDataFormats.Text) ? DataPackageOperation.Copy : DataPackageOperation.None;
         }
 
         private void SelectedStepsListView_DragItemsStarting(object sender, DragItemsStartingEventArgs e)
