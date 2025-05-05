@@ -20,6 +20,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="ProgramsPage.xaml" />
+    <None Remove="ProgramTimeline.xaml" />
     <None Remove="StepsPage.xaml" />
   </ItemGroup>
 
@@ -48,6 +49,17 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250401001" />
+    <PackageReference Include="ScottPlot.WinUI" Version="5.0.55" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="ServicePlanPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="ProgramTimeline.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="ProgramsPage.xaml">

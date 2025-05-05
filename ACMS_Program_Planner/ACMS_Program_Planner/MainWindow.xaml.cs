@@ -60,6 +60,14 @@ namespace ACMS_Program_Planner
             {
                 ContentFrame.Navigate(typeof(ProgramsPage));
             }
+            /*else if (args.SelectedItemContainer.Tag.ToString() == "LoadPlanPage")
+            {
+                ContentFrame.Navigate(typeof(LoadPlanPage));
+            }*/
+            else if (args.SelectedItemContainer.Tag.ToString() == "ServicePlanPage")
+            {
+                ContentFrame.Navigate(typeof(ServicePlanPage));
+            }
         }
 
         private bool TrySetSystemBackdrop()

@@ -33,7 +33,7 @@ namespace ACMS_Program_Planner
         public StepsPage()
         {
             this.InitializeComponent();
-            StepsListView.ItemsSource = Steps;
+            //StepsListView.ItemsSource = Steps;
         }
 
         private void AddItemButton_Click(object sender, RoutedEventArgs e)
@@ -65,7 +65,20 @@ namespace ACMS_Program_Planner
                 FormPanel.Visibility = Visibility.Visible;
                 StepId.Text = "Step Id: " + selectedStep.Id.ToString();
                 DataContext = selectedStep;
+                DurationSecondsNumberBox.IsEnabled = selectedStep.TerminateIfTimeExpired;
             }
         }
+
+        private void TerminateIfTimeExpiredCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            DurationSecondsNumberBox.IsEnabled = true;
+        }
+
+        private void TerminateIfTimeExpiredCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            DurationSecondsNumberBox.IsEnabled = false;
+        }
+
+        
     }
 }

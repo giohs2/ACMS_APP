@@ -17,10 +17,18 @@ namespace ACMS_Program_Planner.Services
         private static readonly string DirectoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Ipeco", "ACMS_Program_Planner");
         private static readonly string FilePath = Path.Combine(DirectoryPath, "data.json");
 
+        private ObservableCollection<Unit> units1 = new ObservableCollection<Unit>();
+        private ObservableCollection<Unit> units2 = new ObservableCollection<Unit>();
+
         public ObservableCollection<StepItem> Steps { get; } = new ObservableCollection<StepItem>();
         public ObservableCollection<ProgramItem> Programs { get; } = new ObservableCollection<ProgramItem>();
+        public ObservableCollection<ServicePlanItem> ServicePlans { get; } = new ObservableCollection<ServicePlanItem>();
+
+        public ObservableCollection<Flight> Flights { get; } = new ObservableCollection<Flight>();
+
         public int NextStepId { get; private set; } = 1;
         public int NextProgramId { get; private set; } = 1;
+        public int NextServicePlanId { get; private set; } = 1;
 
         private DataService()
         {
@@ -32,21 +40,50 @@ namespace ACMS_Program_Planner.Services
             var data = LoadData();
             Steps = data.Steps ?? new ObservableCollection<StepItem>();
             Programs = data.Programs ?? new ObservableCollection<ProgramItem>();
+            ServicePlans = data.ServicePlans ?? new ObservableCollection<ServicePlanItem>();
             NextStepId = data.NextStepId;
             NextProgramId = data.NextProgramId;
+            NextServicePlanId = data.NextServicePlanId;
 
             Steps.CollectionChanged += OnStepsCollectionChanged;
             Programs.CollectionChanged += OnProgramsCollectionChanged;
+            ServicePlans.CollectionChanged += OnServicePlanCollectionChanged;
 
             foreach (var step in Steps)
             {
-                step.PropertyChanged += OnStepItemPropertyChanged;
+                step.PropertyChanged += (s, args) => SaveData();
             }
 
             foreach (var program in Programs)
             {
-                program.PropertyChanged += OnProgramPropertyChanged;
+                program.PropertyChanged += (s, args) => SaveData();
             }
+
+            foreach (var servicePlan in ServicePlans)
+            {
+                servicePlan.PropertyChanged += (s, args) => SaveData();
+                servicePlan.Cycles.CollectionChanged += OnCyclesCollectionChanged;
+                foreach(var cycle in servicePlan.Cycles)
+                {
+                    cycle.PropertyChanged += (s, args) => SaveData();
+                    cycle.UnitPrograms.CollectionChanged += OnUnitProgramsCollectionChanged;
+                    foreach (var unitProgram in cycle.UnitPrograms)
+                    {
+                        unitProgram.PropertyChanged += (s, args) => SaveData();
+                    }
+                }
+            }
+
+            // Fill dummy list of Units
+            units1.Add(new Unit { UnitNumber = 1, UnitName = "Oven 1", DeviceClass = 1, DeviceGroup = 2, DeviceId = 3 });
+            units1.Add(new Unit { UnitNumber = 2, UnitName = "Oven 2", DeviceClass = 1, DeviceGroup = 2, DeviceId = 4 });
+            units2.Add(new Unit { UnitNumber = 3, UnitName = "Oven 3", DeviceClass = 1, DeviceGroup = 2, DeviceId = 5 });
+            units2.Add(new Unit { UnitNumber = 4, UnitName = "Oven 4", DeviceClass = 1, DeviceGroup = 2, DeviceId = 6 });
+
+            // fill dummy Flights data
+            Flights.Add(new Flight { FlightNumber = "XY123", FlightDate = "01/06/2025", FlightTime="14:00", Units = units1 });
+            Flights.Add(new Flight { FlightNumber = "XY456", FlightDate = "02/06/2025", FlightTime = "15:00", Units = units2 });
+
         }
 
         private void OnStepsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -55,7 +92,7 @@ namespace ACMS_Program_Planner.Services
             {
                 foreach (StepItem newItem in e.NewItems)
                 {
-                    newItem.PropertyChanged += OnStepItemPropertyChanged;
+                    newItem.PropertyChanged += (s, args) => SaveData();
                 }
             }
 
@@ -63,7 +100,7 @@ namespace ACMS_Program_Planner.Services
             {
                 foreach (StepItem oldItem in e.OldItems)
                 {
-                    oldItem.PropertyChanged -= OnStepItemPropertyChanged;
+                    oldItem.PropertyChanged -= (s, args) => SaveData();
                 }
             }
 
@@ -76,7 +113,7 @@ namespace ACMS_Program_Planner.Services
             {
                 foreach (ProgramItem newProgram in e.NewItems)
                 {
-                    newProgram.PropertyChanged += OnProgramPropertyChanged;
+                    newProgram.PropertyChanged += (s, args) => SaveData();
                 }
             }
 
@@ -84,33 +121,111 @@ namespace ACMS_Program_Planner.Services
             {
                 foreach (ProgramItem oldProgram in e.OldItems)
                 {
-                    oldProgram.PropertyChanged -= OnProgramPropertyChanged;
+                    oldProgram.PropertyChanged -= (s, args) => SaveData();
                 }
             }
 
             SaveData();
         }
 
-        private void OnStepItemPropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void OnServicePlanCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
+            if (e.NewItems != null)
+            {
+                foreach (ServicePlanItem newServicePlan in e.NewItems)
+                {
+                    newServicePlan.PropertyChanged += (s, args) => SaveData();
+
+                    // Subscribe to changes in the Cycles collection
+                    newServicePlan.Cycles.CollectionChanged += OnCyclesCollectionChanged;
+                }
+            }
+
+            if (e.OldItems != null)
+            {
+                foreach (ServicePlanItem oldServicePlan in e.OldItems)
+                {
+                    oldServicePlan.PropertyChanged -= (s, args) => SaveData();
+
+                    // Unsubscribe from changes in the Cycles collection
+                    oldServicePlan.Cycles.CollectionChanged -= OnCyclesCollectionChanged;
+                }
+            }
+
             SaveData();
         }
 
-        private void OnProgramPropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void OnCyclesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
+            if (e.NewItems != null)
+            {
+                foreach (Cycle newCycle in e.NewItems)
+                {
+                    newCycle.PropertyChanged += (s, args) => SaveData();
+
+                    newCycle.UnitPrograms.CollectionChanged += OnUnitProgramsCollectionChanged;
+                    foreach (var unitProgram in newCycle.UnitPrograms)
+                    {
+                        unitProgram.PropertyChanged += (s, args) => SaveData();
+                    }
+                }
+            }
+
+            if (e.OldItems != null)
+            {
+                foreach (Cycle oldCycle in e.OldItems)
+                {
+                    oldCycle.PropertyChanged -= (s, args) => SaveData();
+
+                    oldCycle.UnitPrograms.CollectionChanged -= OnUnitProgramsCollectionChanged;
+                    foreach (var unitProgram in oldCycle.UnitPrograms)
+                    {
+                        unitProgram.PropertyChanged -= (s, args) => SaveData();
+                    }
+                }
+            }
+
             SaveData();
         }
 
-        private (ObservableCollection<StepItem> Steps, ObservableCollection<ProgramItem> Programs, int NextStepId, int NextProgramId) LoadData()
+        private void OnUnitProgramsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.NewItems != null)
+            {
+                foreach (UnitProgram newUnitProgram in e.NewItems)
+                {
+                    newUnitProgram.PropertyChanged += (s, args) => SaveData();
+                }
+            }
+
+            if (e.OldItems != null)
+            {
+                foreach (UnitProgram oldUnitProgram in e.OldItems)
+                {
+                    oldUnitProgram.PropertyChanged -= (s, args) => SaveData();
+                }
+            }
+
+            SaveData();
+        }
+
+
+        private (ObservableCollection<StepItem> Steps,
+                 ObservableCollection<ProgramItem> Programs,
+                 ObservableCollection<ServicePlanItem> ServicePlans,
+                 int NextStepId, int NextProgramId, int NextServicePlanId) LoadData()
         {
             if (File.Exists(FilePath))
             {
                 var json = File.ReadAllText(FilePath);
                 var data = JsonSerializer.Deserialize<DataModel>(json);
-                return (data?.Steps ?? new ObservableCollection<StepItem>(), data?.Programs ?? new ObservableCollection<ProgramItem>(), data?.NextStepId ?? 1, data?.NextProgramId ?? 1);
+                return (data?.Steps ?? new ObservableCollection<StepItem>(), 
+                        data?.Programs ?? new ObservableCollection<ProgramItem>(),
+                        data?.ServicePlans ?? new ObservableCollection<ServicePlanItem>(),
+                        data?.NextStepId ?? 1, data?.NextProgramId ?? 1, data?.NextServicePlanId ?? 1);
             }
 
-            return (new ObservableCollection<StepItem>(), new ObservableCollection<ProgramItem>(), 1, 1);
+            return (new ObservableCollection<StepItem>(), new ObservableCollection<ProgramItem>(), new ObservableCollection<ServicePlanItem>(), 1, 1, 1);
         }
 
         private void SaveData()
@@ -119,8 +234,10 @@ namespace ACMS_Program_Planner.Services
             {
                 Steps = Steps,
                 Programs = Programs,
+                ServicePlans = ServicePlans,
                 NextStepId = NextStepId,
-                NextProgramId = NextProgramId
+                NextProgramId = NextProgramId,
+                NextServicePlanId = NextServicePlanId
             };
 
             var json = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });
@@ -138,13 +255,21 @@ namespace ACMS_Program_Planner.Services
             NextProgramId++;
             SaveData();
         }
+
+        public void IncrementNextServicePlanId()
+        {
+            NextServicePlanId++;
+            SaveData();
+        }
     }
 
     public class DataModel
     {
         public ObservableCollection<StepItem> Steps { get; set; }
         public ObservableCollection<ProgramItem> Programs { get; set; }
+        public ObservableCollection<ServicePlanItem> ServicePlans { get; set; }
         public int NextStepId { get; set; }
         public int NextProgramId { get; set; }
+        public int NextServicePlanId { get; set; }
     }
 }

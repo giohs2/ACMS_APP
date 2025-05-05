@@ -41,15 +41,14 @@
                 <TextBlock x:Name="StepId" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,24" />
                 <TextBlock Text="Name" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="0,0,0,12" />
                 <TextBox x:Name="NameTextBox" Margin="0,0,0,16" Width="250" HorizontalAlignment="Left" HorizontalContentAlignment="Left" Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                <TextBlock Text="Time" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="0,0,0,12" />
-                <NumberBox x:Name="DurationSecondsNumberBox" Margin="0,0,0,16" Width="150" HorizontalAlignment="Left" HorizontalContentAlignment="Left" Minimum="0" SpinButtonPlacementMode="Inline" Value="{Binding DurationSeconds, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                <TextBlock Text="Temperature" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="0,0,0,12" />
-                <NumberBox x:Name="FinalTemperatureNumberBox" Margin="0,0,0,16" Width="150" HorizontalAlignment="Left" HorizontalContentAlignment="Left" Minimum="0" SpinButtonPlacementMode="Inline" Value="{Binding FinalTemperature, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />  
-               <CheckBox x:Name="IsSteamerActiveCheckBox" Content="Steaming Active" Margin="0,0,0,16" IsChecked="{Binding IsSteamerActive, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                <TextBlock Text="Termination of Step:" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="0,0,0,12" />  
-               <CheckBox x:Name="TerminateIfTemperatureReachedCheckBox" Content="Temperature Reached" Margin="0,0,0,16" IsChecked="{Binding TerminateIfTemperatureReached, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />  
-               <CheckBox x:Name="TerminateIfTimeExpiredCheckBox" Content="Time Expired" Margin="0,0,0,16" IsChecked="{Binding TerminateIfTimeExpired, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />  
-           </StackPanel>  
+                <TextBlock Text="Duration (sec)" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="0,0,0,12" />
+                <NumberBox x:Name="DurationSecondsNumberBox" Margin="0,0,0,16" Width="200" HorizontalAlignment="Left" HorizontalContentAlignment="Left" Minimum="0" SpinButtonPlacementMode="Inline" Value="{Binding DurationSeconds, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock Text="Temperature (°C)" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="0,0,0,12" />
+                <NumberBox x:Name="FinalTemperatureNumberBox" Margin="0,0,0,16" Width="200" HorizontalAlignment="Left" HorizontalContentAlignment="Left" Minimum="0" SpinButtonPlacementMode="Inline" Value="{Binding FinalTemperature, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <CheckBox x:Name="IsSteamerActiveCheckBox" Content="Steaming Active" Margin="0,0,0,16" IsChecked="{Binding IsSteamerActive, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <CheckBox x:Name="TerminateIfTimeExpiredCheckBox" Content="Terminate Step if Duration expired" Margin="0,0,0,16" IsChecked="{Binding TerminateIfTimeExpired, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Checked="TerminateIfTimeExpiredCheckBox_Checked" Unchecked="TerminateIfTimeExpiredCheckBox_Unchecked" />
+                <CheckBox x:Name="TerminateIfTemperatureReachedCheckBox" Content="Terminate Step if Temperature reached" Margin="0,0,0,16" IsChecked="{Binding TerminateIfTemperatureReached, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>  
        </Border>  
    </Grid>  
 </Page>

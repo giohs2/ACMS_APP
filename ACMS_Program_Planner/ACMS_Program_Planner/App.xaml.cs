@@ -49,14 +49,14 @@ namespace ACMS_Program_Planner
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
             m_window = new MainWindow();
-            var scale = windowScaling();
+            var scale = windowScaling(m_window);
             m_window.AppWindow.Resize(new Windows.Graphics.SizeInt32((int)(1024 * scale), (int)(768 * scale)));
             m_window.Activate();
         }
 
-        private float windowScaling()
+        public static float windowScaling(Window window)
         {
-            IntPtr hWnd = WinRT.Interop.WindowNative.GetWindowHandle(m_window);
+            IntPtr hWnd = WinRT.Interop.WindowNative.GetWindowHandle(window);
             var dpi = GetDpiForWindow(hWnd);
             return 1.0f + (dpi - 96) / 96.0f;
         }

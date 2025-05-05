@@ -43,7 +43,14 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <StackPanel Grid.Row="0" Margin="10">
-                    <TextBlock x:Name="ProgramId" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,24" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" x:Name="ProgramId" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,24" />
+                        <Button Grid.Column="1" HorizontalAlignment="Right"  Content="Visualise" Click="Visualise_Button_Click" />
+                    </Grid>
                     <TextBlock Text="Name" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="0,0,0,12" />
                     <TextBox x:Name="ProgramNameTextBox" Margin="0,0,0,16" Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     <Grid Margin="10">

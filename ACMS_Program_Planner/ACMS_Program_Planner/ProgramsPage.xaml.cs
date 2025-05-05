@@ -196,5 +196,13 @@ namespace ACMS_Program_Planner
                 UpdateSelectedStepsList();
             } 
         }
+
+        private void Visualise_Button_Click(object sender, RoutedEventArgs e)
+        {
+            Window timelineWin = new ProgramTimeline(selectedProgram);
+            var scale = App.windowScaling(timelineWin);
+            timelineWin.AppWindow.Resize(new Windows.Graphics.SizeInt32((int)(800 * scale), (int)(600 * scale)));
+            timelineWin.Activate();
+        }
     }
 }

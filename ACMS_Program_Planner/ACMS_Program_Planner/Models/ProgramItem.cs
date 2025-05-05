@@ -7,7 +7,7 @@ namespace ACMS_Program_Planner.Models
     public class ProgramItem : INotifyPropertyChanged
     {
         private int id;
-        private string name;
+        private string? name;
         private ObservableCollection<int> stepIds = new ObservableCollection<int>();
 
         public int Id
@@ -23,7 +23,7 @@ namespace ACMS_Program_Planner.Models
             }
         }
 
-        public string Name
+        public string? Name
         {
             get => name;
             set

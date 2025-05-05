@@ -25,8 +25,8 @@
                         IsSettingsVisible="True"
                         IsBackButtonVisible="Collapsed"
                         IsPaneToggleButtonVisible="False"
-                        OpenPaneLength="100"
-                        CompactPaneLength="100"
+                        OpenPaneLength="120"
+                        CompactPaneLength="120"
                         IsPaneOpen="True">
             <NavigationView.Resources>
                 <Style TargetType="NavigationViewItem">
@@ -48,6 +48,22 @@
                         <StackPanel HorizontalAlignment="Center">
                             <FontIcon Glyph="&#xE8D2;" FontSize="24" />
                             <TextBlock Text="Programs" HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </NavigationViewItem.Content>
+                </NavigationViewItem>
+                <!--NavigationViewItem Tag="LoadPlanPage">
+                    <NavigationViewItem.Content>
+                        <StackPanel HorizontalAlignment="Center">
+                            <FontIcon Glyph="&#xE8D2;" FontSize="24" />
+                            <TextBlock Text="Load Plans" HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </NavigationViewItem.Content>
+                </NavigationViewItem-->
+                <NavigationViewItem Tag="ServicePlanPage">
+                    <NavigationViewItem.Content>
+                        <StackPanel HorizontalAlignment="Center">
+                            <FontIcon Glyph="&#xE8D2;" FontSize="24" />
+                            <TextBlock Text="Service Plans" HorizontalAlignment="Center" />
                         </StackPanel>
                     </NavigationViewItem.Content>
                 </NavigationViewItem>
