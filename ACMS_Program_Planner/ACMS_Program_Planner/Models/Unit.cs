@@ -10,7 +10,7 @@ namespace ACMS_Program_Planner.Models
     {
         public int UnitNumber { get; set; }
 
-        public string UnitName { get; set; }
+        public string? UnitName { get; set; }
 
         public int DeviceClass { get; set; }
 

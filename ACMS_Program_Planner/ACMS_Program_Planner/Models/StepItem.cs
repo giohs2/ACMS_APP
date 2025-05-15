@@ -5,7 +5,7 @@ namespace ACMS_Program_Planner.Models
     public class StepItem : INotifyPropertyChanged
     {
         private int id;
-        private string name;
+        private string? name;
         private double finalTemperature;
         private int durationSeconds;
         private bool isSteamerActive;
@@ -25,7 +25,7 @@ namespace ACMS_Program_Planner.Models
             }
         }
 
-        public string Name
+        public string? Name
         {
             get => name;
             set
@@ -103,7 +103,7 @@ namespace ACMS_Program_Planner.Models
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         protected void OnPropertyChanged(string propertyName)
         {

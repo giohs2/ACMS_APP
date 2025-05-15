@@ -184,7 +184,9 @@ namespace ACMS_Program_Planner
                 options.threadType = 2;    // DQTYPE_THREAD_CURRENT
                 options.apartmentType = 2; // DQTAT_COM_STA
 
+#pragma warning disable CS8601 // Possible null reference assignment.
                 _ = CreateDispatcherQueueController(options, ref m_dispatcherQueueController);
+#pragma warning restore CS8601 // Possible null reference assignment.
             }
         }
     }

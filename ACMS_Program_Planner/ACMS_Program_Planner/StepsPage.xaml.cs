@@ -26,14 +26,13 @@ namespace ACMS_Program_Planner
     /// </summary>
     public sealed partial class StepsPage : Page
     {
-        private StepItem selectedStep;
+        private StepItem? selectedStep;
 
         public ObservableCollection<StepItem> Steps => DataService.Instance.Steps;
 
         public StepsPage()
         {
-            this.InitializeComponent();
-            //StepsListView.ItemsSource = Steps;
+            InitializeComponent();
         }
 
         private void AddItemButton_Click(object sender, RoutedEventArgs e)

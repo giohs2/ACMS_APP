@@ -52,12 +52,12 @@ namespace ACMS_Program_Planner.Models
             }
         }
 
-        private void StepIds_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void StepIds_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             OnPropertyChanged(nameof(StepIds));
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         protected void OnPropertyChanged(string propertyName)
         {

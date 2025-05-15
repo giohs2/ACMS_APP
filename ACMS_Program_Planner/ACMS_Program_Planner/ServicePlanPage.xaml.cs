@@ -54,7 +54,7 @@ namespace ACMS_Program_Planner
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        protected void OnPropertyChanged(string propertyName)
+        private void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
@@ -100,6 +100,8 @@ namespace ACMS_Program_Planner
 
         private void Add_CycleButton_Click(object sender, RoutedEventArgs e)
         {
+            if (selectedServicePlan == null) return;
+
             ObservableCollection<UnitProgram> unitPrograms = new ObservableCollection<UnitProgram>();
             foreach (var unit in DataService.Instance.Flights[FlightsComboBox.SelectedIndex].Units)
             {
@@ -128,8 +130,11 @@ namespace ACMS_Program_Planner
         {
             if (FlightsComboBox.SelectedItem is Flight selectedItem)
             {
-                selectedServicePlan.Flight = selectedItem;
-                AddCycleButton.IsEnabled = true;
+                if (selectedServicePlan != null)
+                {
+                    selectedServicePlan.Flight = selectedItem;
+                    AddCycleButton.IsEnabled = true;
+                }
             }
             else
             {
@@ -220,14 +225,14 @@ namespace ACMS_Program_Planner
 
     class CycleItemTemplateSelector : DataTemplateSelector
     {
-        public DataTemplate CycleTemplate { get; set; }
-        public DataTemplate UnitTemplate { get; set; }
+        public DataTemplate? CycleTemplate { get; set; }
+        public DataTemplate? UnitTemplate { get; set; }
 
         protected override DataTemplate SelectTemplateCore(object item)
         {
-            if (item is Cycle)
+            if (item is Cycle && CycleTemplate != null)
                 return CycleTemplate;
-            else if (item is UnitProgram)
+            else if (item is UnitProgram && UnitTemplate != null)
                 return UnitTemplate;
             else
                 return base.SelectTemplateCore(item);

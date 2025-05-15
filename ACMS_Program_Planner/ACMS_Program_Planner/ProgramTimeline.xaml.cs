@@ -66,7 +66,8 @@ namespace ACMS_Program_Planner
                     hs.FillStyle.Color = step.IsSteamerActive ? Colors.Magenta.WithAlpha(.2) : Colors.DarkBlue.WithAlpha(.2);
                     //hs.LegendText = step.IsSteamerActive ? "Steaming Active" : "Steaming Inactive";
                     //hs.IsResizable = true;
-                    ProgramPlot.Plot.Add.Text(step.Name, x[counter] + 1, 195);
+                    if (step.Name != null)
+                        ProgramPlot.Plot.Add.Text(step.Name, x[counter] + 1, 195);
                     /*var anno = ProgramPlot.Plot.Add.Annotation(step.Name);
                     anno.LabelFontSize = 26;
                     anno.LabelBackgroundColor = Colors.RebeccaPurple.WithAlpha(.3);

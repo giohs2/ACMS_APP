@@ -28,12 +28,12 @@ namespace ACMS_Program_Planner
     /// </summary>
     public sealed partial class ProgramsPage : Page, INotifyPropertyChanged
     {
-        private ProgramItem selectedProgram;
-        private StepItem selectedStep;
+        private ProgramItem? selectedProgram;
+        private StepItem? selectedStep;
 
         public ProgramsPage()
         {
-            this.InitializeComponent();
+            InitializeComponent();
         }
 
         public ObservableCollection<ProgramItem> Programs => DataService.Instance.Programs;
@@ -51,7 +51,7 @@ namespace ACMS_Program_Planner
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         private void OnPropertyChanged(string propertyName)
         {
@@ -147,7 +147,7 @@ namespace ACMS_Program_Planner
 
         private async void SelectedStepsListView_Drop(object sender, DragEventArgs e)
         {
-            if (e.DataView.Contains(StandardDataFormats.Text))
+            if (e.DataView.Contains(StandardDataFormats.Text) && selectedProgram != null)
             {
                 e.AcceptedOperation = DataPackageOperation.Copy;
                 var stepIdString = await e.DataView.GetTextAsync();
@@ -165,7 +165,9 @@ namespace ACMS_Program_Planner
 
         private void AvailableStepsListView_DragItemsStarting(object sender, DragItemsStartingEventArgs e)
         {
-            e.Data.SetText((e.Items[0] as StepItem).Id.ToString());
+            var stepItem = e.Items[0] as StepItem;
+            if (stepItem == null) return;
+            e.Data.SetText(stepItem.Id.ToString());
             e.Data.RequestedOperation = DataPackageOperation.Copy;
         }
 
@@ -174,7 +176,6 @@ namespace ACMS_Program_Planner
             e.AcceptedOperation = e.DataView.Contains(StandardDataFormats.Text) ? DataPackageOperation.Copy : DataPackageOperation.None;
         }
 
-        // ...existing code...
         private void AvailableStepsListView_DragOver(object sender, DragEventArgs e)
         {
             e.AcceptedOperation = e.DataView.Contains(StandardDataFormats.Text) ? DataPackageOperation.Copy : DataPackageOperation.None;
@@ -182,7 +183,9 @@ namespace ACMS_Program_Planner
 
         private void SelectedStepsListView_DragItemsStarting(object sender, DragItemsStartingEventArgs e)
         {
-            e.Data.SetText((e.Items[0] as StepItem).Id.ToString());
+            var stepItem = e.Items[0] as StepItem;
+            if (stepItem == null) return;
+            e.Data.SetText(stepItem.Id.ToString());
         }
 
         private void SelectedStepsListView_DragItemsCompleted(ListViewBase sender, DragItemsCompletedEventArgs args)
@@ -190,7 +193,7 @@ namespace ACMS_Program_Planner
             var stepItem = args.Items[0] as StepItem;
 
             // Check if the item was dropped on AvailableStepsListView
-            if (args.DropResult == DataPackageOperation.Copy)
+            if (args.DropResult == DataPackageOperation.Copy && selectedProgram != null && stepItem != null)
             {
                 selectedProgram.StepIds.Remove(stepItem.Id);
                 UpdateSelectedStepsList();
@@ -199,10 +202,13 @@ namespace ACMS_Program_Planner
 
         private void Visualise_Button_Click(object sender, RoutedEventArgs e)
         {
-            Window timelineWin = new ProgramTimeline(selectedProgram);
-            var scale = App.windowScaling(timelineWin);
-            timelineWin.AppWindow.Resize(new Windows.Graphics.SizeInt32((int)(800 * scale), (int)(600 * scale)));
-            timelineWin.Activate();
+            if (selectedProgram != null)
+            {
+                Window timelineWin = new ProgramTimeline(selectedProgram);
+                var scale = App.windowScaling(timelineWin);
+                timelineWin.AppWindow.Resize(new Windows.Graphics.SizeInt32((int)(800 * scale), (int)(600 * scale)));
+                timelineWin.Activate();
+            }
         }
     }
 }

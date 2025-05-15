@@ -11,7 +11,7 @@ namespace ACMS_Program_Planner.Services
 {
     public class DataService
     {
-        private static DataService _instance;
+        private static DataService? _instance;
         public static DataService Instance => _instance ??= new DataService();
 
         private static readonly string DirectoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Ipeco", "ACMS_Program_Planner");
@@ -86,7 +86,7 @@ namespace ACMS_Program_Planner.Services
 
         }
 
-        private void OnStepsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void OnStepsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.NewItems != null)
             {
@@ -107,7 +107,7 @@ namespace ACMS_Program_Planner.Services
             SaveData();
         }
 
-        private void OnProgramsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void OnProgramsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.NewItems != null)
             {
@@ -128,7 +128,7 @@ namespace ACMS_Program_Planner.Services
             SaveData();
         }
 
-        private void OnServicePlanCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void OnServicePlanCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.NewItems != null)
             {
@@ -155,7 +155,7 @@ namespace ACMS_Program_Planner.Services
             SaveData();
         }
 
-        private void OnCyclesCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void OnCyclesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.NewItems != null)
             {
@@ -188,7 +188,7 @@ namespace ACMS_Program_Planner.Services
             SaveData();
         }
 
-        private void OnUnitProgramsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void OnUnitProgramsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.NewItems != null)
             {
@@ -265,9 +265,9 @@ namespace ACMS_Program_Planner.Services
 
     public class DataModel
     {
-        public ObservableCollection<StepItem> Steps { get; set; }
-        public ObservableCollection<ProgramItem> Programs { get; set; }
-        public ObservableCollection<ServicePlanItem> ServicePlans { get; set; }
+        public ObservableCollection<StepItem>? Steps { get; set; }
+        public ObservableCollection<ProgramItem>? Programs { get; set; }
+        public ObservableCollection<ServicePlanItem>? ServicePlans { get; set; }
         public int NextStepId { get; set; }
         public int NextProgramId { get; set; }
         public int NextServicePlanId { get; set; }
