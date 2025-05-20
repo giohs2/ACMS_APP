@@ -13,9 +13,13 @@
            <ColumnDefinition Width="0.7*" />  
        </Grid.ColumnDefinitions>  
 
-       <!-- Left Column -->  
-       <StackPanel Grid.Column="0" Margin="10">  
-           <Grid Margin="0,0,0,10">  
+       <!-- Left Column -->
+        <Grid Grid.Column="0" Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0" Margin="0,0,0,10">  
                <Grid.ColumnDefinitions>  
                    <ColumnDefinition Width="*" />  
                    <ColumnDefinition Width="Auto" />  
@@ -23,7 +27,7 @@
                 <TextBlock Text="Steps" VerticalAlignment="Center" Style="{StaticResource SubtitleTextBlockStyle}" Margin="10,0,0,0" Grid.Column="0" />  
                <Button Content="Add Step" Click="AddItemButton_Click" Grid.Column="1" />  
            </Grid>  
-           <ListView x:Name="StepsListView" SelectionChanged="StepsListView_SelectionChanged" ItemsSource="{x:Bind Steps}">  
+           <ListView Grid.Row="1" x:Name="StepsListView" SelectionChanged="StepsListView_SelectionChanged" ItemsSource="{x:Bind Steps}">  
                <ListView.ItemTemplate>  
                    <DataTemplate x:DataType="models:StepItem">  
                        <StackPanel Margin="0, 5, 0, 5">
@@ -33,7 +37,7 @@
                    </DataTemplate>  
                </ListView.ItemTemplate>  
            </ListView>  
-       </StackPanel>  
+       </Grid>  
 
         <!-- Right Column -->  
         <Border Grid.Column="1" Background="{StaticResource LayerFillColorDefaultBrush}" Margin="8" CornerRadius="8">  

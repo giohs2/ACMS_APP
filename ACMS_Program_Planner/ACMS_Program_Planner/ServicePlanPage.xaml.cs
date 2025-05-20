@@ -1,4 +1,6 @@
-﻿using Microsoft.UI.Xaml;
+﻿using ACMS_Program_Planner.Models;
+using ACMS_Program_Planner.Services;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Data;
@@ -7,15 +9,14 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
-using ACMS_Program_Planner.Models;
-using ACMS_Program_Planner.Services;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
+using Windows.UI.Core;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -95,6 +96,7 @@ namespace ACMS_Program_Planner
                     FlightsComboBox.SelectedIndex = -1;
                     AddCycleButton.IsEnabled = false;
                 }
+                ItemDetails.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -166,7 +168,7 @@ namespace ACMS_Program_Planner
         {
             ItemDetails.Visibility = Visibility.Visible;
 
-            if (args.AddedItems[0] is Cycle selectedItem)
+            if (args.AddedItems.Count > 0 && args.AddedItems[0] is Cycle selectedItem)
             {
                 selectedStep = selectedItem;
                 ItemTitle.Text = selectedItem.Name;
@@ -179,7 +181,7 @@ namespace ACMS_Program_Planner
                 StartOffsetNumberBoxTitle.Visibility = Visibility.Collapsed;
                 StartOffsetNumberBox.Visibility = Visibility.Collapsed;
             }
-            else if (args.AddedItems[0] is UnitProgram selectedUnit)
+            else if (args.AddedItems.Count > 0 && args.AddedItems[0] is UnitProgram selectedUnit)
             {
                 selectedStep = ServiceSteps.FirstOrDefault(x => x.CycleId == selectedUnit.CycleId);
                 TimeBetween.Visibility = Visibility.Collapsed;

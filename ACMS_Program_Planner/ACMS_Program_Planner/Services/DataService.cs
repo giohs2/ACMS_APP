@@ -9,6 +9,12 @@ using ACMS_Program_Planner.Models;
 
 namespace ACMS_Program_Planner.Services
 {
+    /**
+     * @class DataService
+     * @brief A service class responsible for managing and persisting data.
+     *
+     * This class provides functionality for saving the current state of the data model to a file in JSON format.
+     */
     public class DataService
     {
         private static DataService? _instance;
@@ -209,7 +215,7 @@ namespace ACMS_Program_Planner.Services
             SaveData();
         }
 
-
+        
         private (ObservableCollection<StepItem> Steps,
                  ObservableCollection<ProgramItem> Programs,
                  ObservableCollection<ServicePlanItem> ServicePlans,

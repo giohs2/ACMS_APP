@@ -41,8 +41,12 @@
         </Grid.ColumnDefinitions>
 
         <!-- Left Column -->
-        <StackPanel Grid.Column="0" Margin="10">
-            <Grid Margin="0,0,0,10">
+        <Grid Grid.Column="0" Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0" Margin="0,0,0,10">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
@@ -50,7 +54,7 @@
                 <TextBlock Text="Service Plans" VerticalAlignment="Center" Style="{StaticResource SubtitleTextBlockStyle}" Margin="10,0,0,0" Grid.Column="0" />
                 <Button Content="Add Plan" Click="Button_Click" Grid.Column="1" />
             </Grid>
-            <ListView x:Name="PlansListView" SelectionChanged="PlansListView_SelectionChanged"  ItemsSource="{x:Bind ServicePlans}">
+            <ListView Grid.Row="1" x:Name="PlansListView" SelectionChanged="PlansListView_SelectionChanged" ItemsSource="{x:Bind ServicePlans}">
                 <ListView.ItemTemplate>
                     <DataTemplate x:DataType="models:ServicePlanItem">
                         <StackPanel Margin="0, 5, 0, 5">
@@ -61,7 +65,7 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-        </StackPanel>
+        </Grid>
 
         <!-- Right Column -->
         <Border Grid.Column="1" Background="{StaticResource LayerFillColorDefaultBrush}" Margin="8" CornerRadius="8">
