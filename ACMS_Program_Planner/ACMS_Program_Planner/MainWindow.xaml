@@ -51,19 +51,19 @@
                         </StackPanel>
                     </NavigationViewItem.Content>
                 </NavigationViewItem>
-                <!--NavigationViewItem Tag="LoadPlanPage">
-                    <NavigationViewItem.Content>
-                        <StackPanel HorizontalAlignment="Center">
-                            <FontIcon Glyph="&#xE8D2;" FontSize="24" />
-                            <TextBlock Text="Load Plans" HorizontalAlignment="Center" />
-                        </StackPanel>
-                    </NavigationViewItem.Content>
-                </NavigationViewItem-->
                 <NavigationViewItem Tag="ServicePlanPage">
                     <NavigationViewItem.Content>
                         <StackPanel HorizontalAlignment="Center">
                             <FontIcon Glyph="&#xE8D2;" FontSize="24" />
                             <TextBlock Text="Service Plans" HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </NavigationViewItem.Content>
+                </NavigationViewItem>
+                <NavigationViewItem Tag="RFIDPage">
+                    <NavigationViewItem.Content>
+                        <StackPanel HorizontalAlignment="Center">
+                            <FontIcon Glyph="&#xE8D2;" FontSize="24" />
+                            <TextBlock Text="RFID" HorizontalAlignment="Center" />
                         </StackPanel>
                     </NavigationViewItem.Content>
                 </NavigationViewItem>

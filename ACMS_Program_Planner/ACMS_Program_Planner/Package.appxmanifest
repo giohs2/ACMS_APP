@@ -9,11 +9,11 @@
   <Identity
     Name="Ipeco.acmspp"
     Publisher="CN=hs2 engineering GmbH, O=hs2 engineering GmbH, L=Ulm, S=Baden-Württemberg, C=DE, SERIALNUMBER=HRB 728080, OID.2.5.4.15=Private Organization, OID.1.3.6.1.4.1.311.60.2.1.1=Ulm, OID.1.3.6.1.4.1.311.60.2.1.2=Baden-Württemberg, OID.1.3.6.1.4.1.311.60.2.1.3=DE"
-    Version="1.0.8.0" />
+    Version="1.0.11.0" />
 
   <Properties>
     <DisplayName>Ipeco ACMS Program Planner</DisplayName>
-    <PublisherDisplayName>Ipeco Holdings Ltd</PublisherDisplayName>
+    <PublisherDisplayName>Ipeco</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 

@@ -58,6 +58,11 @@
                 <ListView.ItemTemplate>
                     <DataTemplate x:DataType="models:ServicePlanItem">
                         <StackPanel Margin="0, 5, 0, 5">
+                            <StackPanel.ContextFlyout>
+                                <MenuFlyout>
+                                    <MenuFlyoutItem Text="Delete" Click="DeletePlan_Click" Icon="Delete"/>
+                                </MenuFlyout>
+                            </StackPanel.ContextFlyout>
                             <TextBlock Text="{x:Bind sys:String.Format('Plan Id: {0}', Id)}" FontWeight="Bold" />
                             <TextBlock Text="{x:Bind sys:String.Format('Name: {0}', Name), Mode=OneWay}" />
                             <TextBlock Text="{x:Bind sys:String.Format('Flight: {0}', FlightName), Mode=OneWay}" />

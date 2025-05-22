@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="ACMS_Program_Planner.RFIDPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:ACMS_Program_Planner"
+    xmlns:models="using:ACMS_Program_Planner.Models"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Padding="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Spacing="10">
+            <TextBlock Text="RFID -- For Development only!" Style="{StaticResource TitleTextBlockStyle}" Margin="10,10,10,10" VerticalAlignment="Center" />
+        </StackPanel>
+        <StackPanel Grid.Row="1" Spacing="20">
+            <!-- RFID Reader/Writer settings -->
+            <StackPanel Margin="0,20,0,0" Orientation="Horizontal">
+                <TextBlock Text="COM Port:" Margin="0,0,5,0" VerticalAlignment="Center" />
+                <ComboBox x:Name="ComPortComboBox" ItemsSource="{x:Bind ViewModel.ComPorts, Mode=OneWay}" SelectedValue="{x:Bind ViewModel.SelectedComPort, Mode=TwoWay}" />
+                <TextBlock Text="Baud Rate:" Margin="10,0,5,0" VerticalAlignment="Center" />
+                <ComboBox x:Name="BaudRateComboBox" ItemsSource="{x:Bind ViewModel.BaudRates, Mode=OneWay}" SelectedValue="{x:Bind ViewModel.SelectedBaudRate, Mode=TwoWay}" />
+                <TextBlock Text="Data Bits:" Margin="10,0,5,0" VerticalAlignment="Center" />
+                <ComboBox x:Name="DataBitsComboBox" ItemsSource="{x:Bind ViewModel.DataBits, Mode=OneWay}" SelectedValue="{x:Bind ViewModel.SelectedDataBit, Mode=TwoWay}" />
+                <TextBlock Text="Stop Bit:" Margin="10,0,5,0" VerticalAlignment="Center" />
+                <ComboBox x:Name="StopBitsComboBox" ItemsSource="{x:Bind ViewModel.StopBits, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedStopBit, Mode=TwoWay}" />
+                <TextBlock Text="Parity:" Margin="10,0,5,0" VerticalAlignment="Center" />
+                <ComboBox x:Name="ParityComboBox" ItemsSource="{x:Bind ViewModel.Parities, Mode=OneWay}" SelectedItem="{x:Bind ViewModel.SelectedParity, Mode=TwoWay}" />
+                <Button x:Name="ConnectButton" Margin="10,0,0,0" Content="Connect" Click="Connect_Button_Click" />
+            </StackPanel>
+        </StackPanel>
+        <!-- Received Data Section -->
+        <Grid Grid.Row="2" Margin="0,20,0,10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,5">
+                <TextBlock Text="Received Data" VerticalAlignment="Center"/>
+                <Button x:Name="Clear_Received_Button" Content="Clear" 
+                        Click="Clear_Received_Button_Click" Margin="10,0,0,0"/>
+            </StackPanel>
+
+            <TextBox x:Name="ReceivedDataTextBox" Grid.Row="1" 
+                     AcceptsReturn="True" TextWrapping="Wrap" IsReadOnly="True"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto"
+                     ScrollViewer.HorizontalScrollBarVisibility="Auto"/>
+        </Grid>
+
+        <!-- Send Data Section -->
+        <Grid Grid.Row="3" Margin="0,20,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBox x:Name="SendDataTextBox" Grid.Column="0" 
+                     PlaceholderText="Enter text to send..." Margin="0,0,10,0"/>
+
+            <Button x:Name="Send_Button" Grid.Column="1" Content="Send" 
+                    Click="Send_Button_Click"/>
+        </Grid>
+
+        <!-- Status Bar -->
+        <TextBlock x:Name="StatusTextBlock" Grid.Row="4" 
+                   Text="Ready" Margin="0,10,0,0"/>
+    </Grid>
+</Page>

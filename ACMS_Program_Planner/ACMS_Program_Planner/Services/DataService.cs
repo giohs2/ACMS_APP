@@ -69,7 +69,7 @@ namespace ACMS_Program_Planner.Services
             {
                 servicePlan.PropertyChanged += (s, args) => SaveData();
                 servicePlan.Cycles.CollectionChanged += OnCyclesCollectionChanged;
-                foreach(var cycle in servicePlan.Cycles)
+                foreach (var cycle in servicePlan.Cycles)
                 {
                     cycle.PropertyChanged += (s, args) => SaveData();
                     cycle.UnitPrograms.CollectionChanged += OnUnitProgramsCollectionChanged;
@@ -80,6 +80,7 @@ namespace ACMS_Program_Planner.Services
                 }
             }
 
+
             // Fill dummy list of Units
             units1.Add(new Unit { UnitNumber = 1, UnitName = "Oven 1", DeviceClass = 1, DeviceGroup = 2, DeviceId = 3 });
             units1.Add(new Unit { UnitNumber = 2, UnitName = "Oven 2", DeviceClass = 1, DeviceGroup = 2, DeviceId = 4 });
@@ -87,10 +88,144 @@ namespace ACMS_Program_Planner.Services
             units2.Add(new Unit { UnitNumber = 4, UnitName = "Oven 4", DeviceClass = 1, DeviceGroup = 2, DeviceId = 6 });
 
             // fill dummy Flights data
-            Flights.Add(new Flight { FlightNumber = "XY123", FlightDate = "01/06/2025", FlightTime="14:00", Units = units1 });
+            Flights.Add(new Flight { FlightNumber = "XY123", FlightDate = "01/06/2025", FlightTime = "14:00", Units = units1 });
             Flights.Add(new Flight { FlightNumber = "XY456", FlightDate = "02/06/2025", FlightTime = "15:00", Units = units2 });
 
+            // Some defaults for demo
+            if (Steps.Count == 0)
+            {
+                ResetToDefaults();
+            }
+
         }
+
+        public void ResetToDefaults()
+        {
+            // Delete the data file if it exists
+            if (File.Exists(FilePath))
+            {
+                File.Delete(FilePath);
+            }
+
+            // Clear all collections
+            Steps.Clear();
+            Programs.Clear();
+            ServicePlans.Clear();
+
+            // Reset IDs
+            NextStepId = 1;
+            NextProgramId = 1;
+            NextServicePlanId = 1;
+
+            // Add default steps
+            var preheatStep = new StepItem
+            {
+                Id = NextStepId,
+                Name = "Preheat Standard",
+                FinalTemperature = 120,
+                DurationSeconds = 600,
+                IsSteamerActive = true,
+                TerminateIfTemperatureReached = true,
+                TerminateIfTimeExpired = true
+            };
+            IncrementNextStepId();
+            Steps.Add(preheatStep);
+
+            var steamingStep = new StepItem
+            {
+                Id = NextStepId,
+                Name = "Steaming Standard",
+                FinalTemperature = 130,
+                DurationSeconds = 1200,
+                IsSteamerActive = true,
+                TerminateIfTemperatureReached = false,
+                TerminateIfTimeExpired = true
+            };
+            IncrementNextStepId();
+            Steps.Add(steamingStep);
+
+            var keepHotStep = new StepItem
+            {
+                Id = NextStepId,
+                Name = "Keep Hot Standard",
+                FinalTemperature = 75,
+                DurationSeconds = 0,
+                IsSteamerActive = true,
+                TerminateIfTemperatureReached = false,
+                TerminateIfTimeExpired = false
+            };
+            IncrementNextStepId();
+            Steps.Add(keepHotStep);
+
+            // Add default program
+            var defaultProgram = new ProgramItem
+            {
+                Id = NextProgramId,
+                Name = "Pasta with Chicken",
+                StepIds = new ObservableCollection<int>() { 1, 2, 3 }
+            };
+            IncrementNextProgramId();
+            Programs.Add(defaultProgram);
+
+            // Add default service plan
+            var newPlan = new ServicePlanItem
+            {
+                Id = NextServicePlanId,
+                Name = "Breakfast",
+                Flight = Flights[0]
+            };
+            IncrementNextServicePlanId();
+
+            ObservableCollection<UnitProgram> unitPrograms = new ObservableCollection<UnitProgram>();
+            foreach (var unit in Flights[0].Units)
+            {
+                unitPrograms.Add(new UnitProgram
+                {
+                    Unit = unit,
+                    CycleId = 1,
+                    Name = "Cycle 1: " + unit.UnitName,
+                    ProgramId = 1,
+                    StartOffset = 0.0f
+                });
+            }
+
+            var newCycle = new Cycle
+            {
+                CycleId = 1,
+                Name = "Cycle 1",
+                UnitPrograms = unitPrograms,
+                Delay = new TimeSpan(1, 15, 0)
+            };
+
+            newPlan.Cycles.Add(newCycle);
+
+            ObservableCollection<UnitProgram> unitPrograms2 = new ObservableCollection<UnitProgram>();
+            foreach (var unit in Flights[0].Units)
+            {
+                unitPrograms2.Add(new UnitProgram
+                {
+                    Unit = unit,
+                    CycleId = 2,
+                    Name = "Cycle 2: " + unit.UnitName,
+                    ProgramId = 1,
+                    StartOffset = 0.0f
+                });
+            }
+
+            var newCycle2 = new Cycle
+            {
+                CycleId = 2,
+                Name = "Cycle 2",
+                UnitPrograms = unitPrograms2
+            };
+
+            newPlan.Cycles.Add(newCycle2);
+            ServicePlans.Add(newPlan);
+
+            // Save the default data
+            SaveData();
+        }
+
 
         private void OnStepsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
@@ -236,8 +371,16 @@ namespace ACMS_Program_Planner.Services
 
         private void SaveData()
         {
+            var header = new DataHeader
+            {
+                Date = DateTime.Now,
+                User = System.Environment.MachineName,
+                Version = SettingsModel.Instance.AppVersion 
+            };
+
             var data = new DataModel
             {
+                Header = header,
                 Steps = Steps,
                 Programs = Programs,
                 ServicePlans = ServicePlans,
@@ -248,6 +391,29 @@ namespace ACMS_Program_Planner.Services
 
             var json = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(FilePath, json);
+        }
+
+        public string GetDataInJson()
+        {
+            var header = new DataHeader
+            {
+                Date = DateTime.Now,
+                User = System.Environment.MachineName,
+                Version = SettingsModel.Instance.AppVersion
+            };
+
+            var data = new DataModel
+            {
+                Header = header,
+                Steps = Steps,
+                Programs = Programs,
+                ServicePlans = ServicePlans,
+                NextStepId = NextStepId,
+                NextProgramId = NextProgramId,
+                NextServicePlanId = NextServicePlanId
+            };
+
+            return JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });
         }
 
         public void IncrementNextStepId()
@@ -269,8 +435,16 @@ namespace ACMS_Program_Planner.Services
         }
     }
 
+    public class DataHeader
+    {
+        public DateTime Date { get; set; }
+        public string? User { get; set; }
+        public string? Version { get; set; }
+    }
+
     public class DataModel
     {
+        public DataHeader? Header { get; set; }
         public ObservableCollection<StepItem>? Steps { get; set; }
         public ObservableCollection<ProgramItem>? Programs { get; set; }
         public ObservableCollection<ServicePlanItem>? ServicePlans { get; set; }

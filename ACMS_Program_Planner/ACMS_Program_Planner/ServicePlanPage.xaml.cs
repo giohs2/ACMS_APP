@@ -13,6 +13,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
@@ -161,6 +162,27 @@ namespace ACMS_Program_Planner
                         }
                     }
                 }
+            }
+        }
+
+        private void DeletePlan_Click(object sender, RoutedEventArgs e)
+        {
+            // Get the clicked item
+            var menuFlyoutItem = sender as MenuFlyoutItem;
+            if (menuFlyoutItem == null) return;
+
+            // Get the data context (ServicePlanItem) of the right-clicked item
+            var servicePlanItem = (menuFlyoutItem.DataContext as ServicePlanItem);
+            if (servicePlanItem == null) return;
+
+            // Remove the item from the collection
+            ServicePlans.Remove(servicePlanItem);
+
+            // Clear the form if the deleted item was selected
+            if (FormPanel.DataContext == servicePlanItem)
+            {
+                FormPanel.Visibility = Visibility.Collapsed;
+                FormPanel.DataContext = null;
             }
         }
 

@@ -19,6 +19,7 @@ using WinRT;
 using WinRT.Interop;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Composition.SystemBackdrops;
+using ACMS_Program_Planner.Models;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -52,7 +53,11 @@ namespace ACMS_Program_Planner
 
         private void MainNavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
         {
-            if (args.SelectedItemContainer.Tag.ToString() == "StepsPage")
+            if (args.IsSettingsSelected)
+            {
+                ContentFrame.Navigate(typeof(SettingsPage));
+            }
+            else if (args.SelectedItemContainer.Tag.ToString() == "StepsPage")
             {
                 ContentFrame.Navigate(typeof(StepsPage));
             }
@@ -60,13 +65,13 @@ namespace ACMS_Program_Planner
             {
                 ContentFrame.Navigate(typeof(ProgramsPage));
             }
-            /*else if (args.SelectedItemContainer.Tag.ToString() == "LoadPlanPage")
-            {
-                ContentFrame.Navigate(typeof(LoadPlanPage));
-            }*/
             else if (args.SelectedItemContainer.Tag.ToString() == "ServicePlanPage")
             {
                 ContentFrame.Navigate(typeof(ServicePlanPage));
+            }
+            else if (args.SelectedItemContainer.Tag.ToString() == "RFIDPage")
+            {
+                ContentFrame.Navigate(typeof(RFIDPage));
             }
         }
 
@@ -139,6 +144,8 @@ namespace ACMS_Program_Planner
                 var titleBar = appWindow.TitleBar;
                 titleBar.ExtendsContentIntoTitleBar = true;
             }
+
+            AppTitleBar.Title = "ACMS Program Planner " + SettingsModel.Instance.AppVersion;
         }
 
         private void SetConfigurationSourceTheme()
