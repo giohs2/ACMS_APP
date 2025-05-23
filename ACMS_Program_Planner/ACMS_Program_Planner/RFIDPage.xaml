@@ -7,20 +7,22 @@
     xmlns:models="using:ACMS_Program_Planner.Models"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="using:System"
     mc:Ignorable="d">
 
-    <Grid Padding="20">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0" Spacing="10">
+        <StackPanel Grid.Row="0" Margin="20,20,20,0">
             <TextBlock Text="RFID -- For Development only!" Style="{StaticResource TitleTextBlockStyle}" Margin="10,10,10,10" VerticalAlignment="Center" />
         </StackPanel>
-        <StackPanel Grid.Row="1" Spacing="20">
+        <StackPanel Grid.Row="1" Spacing="20" Margin="20,20,20,0">
             <!-- RFID Reader/Writer settings -->
             <StackPanel Margin="0,20,0,0" Orientation="Horizontal">
                 <TextBlock Text="COM Port:" Margin="0,0,5,0" VerticalAlignment="Center" />
@@ -37,7 +39,7 @@
             </StackPanel>
         </StackPanel>
         <!-- Received Data Section -->
-        <Grid Grid.Row="2" Margin="0,20,0,10">
+        <Grid Grid.Row="2" Margin="20,20,20,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
@@ -56,7 +58,7 @@
         </Grid>
 
         <!-- Send Data Section -->
-        <Grid Grid.Row="3" Margin="0,20,0,10">
+        <Grid Grid.Row="3" Margin="20,20,20,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -71,6 +73,88 @@
 
         <!-- Status Bar -->
         <TextBlock x:Name="StatusTextBlock" Grid.Row="4" 
-                   Text="Ready" Margin="0,10,0,0"/>
+                   Text="Ready" Margin="20,10,20,10"/>
+
+        <!-- Actual content -->
+        <Grid Grid.Row="5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.3*" />
+                <ColumnDefinition Width="0.7*" />
+            </Grid.ColumnDefinitions>
+            <!-- Left Column -->
+            <Grid Grid.Column="0" Margin="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0" Margin="0,0,0,10">
+                    <TextBlock Text="Choose Service Plan" VerticalAlignment="Center" Style="{StaticResource SubtitleTextBlockStyle}" Margin="10,0,0,0" />
+                </Grid>
+                <ListView Grid.Row="1" x:Name="PlansListView" SelectionChanged="PlansListView_SelectionChanged" ItemsSource="{x:Bind ServicePlans}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="models:ServicePlanItem">
+                            <StackPanel Margin="0, 5, 0, 5">
+                                <TextBlock Text="{x:Bind sys:String.Format('Plan Id: {0}', Id)}" FontWeight="Bold" />
+                                <TextBlock Text="{x:Bind sys:String.Format('Name: {0}', Name), Mode=OneWay}" />
+                                <TextBlock Text="{x:Bind sys:String.Format('Flight: {0}', FlightName), Mode=OneWay}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>
+
+            <!-- Right Column -->
+            <Border Grid.Column="1" Background="{StaticResource LayerFillColorDefaultBrush}" Margin="8" CornerRadius="8">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <ListView Grid.Row="0" x:Name="OvenProgramListView" ItemsSource="{x:Bind RFIDUnits}">
+                        <ListView.Header>
+                            <Grid Margin="16,10,16,0" ColumnSpacing="16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="120" />
+                                    <ColumnDefinition Width="120" />
+                                    <ColumnDefinition Width="120" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Cycle/Oven" />
+                                <TextBlock Grid.Row="0" Grid.Column="1" Text="Program" />
+                                <TextBlock Grid.Row="0" Grid.Column="2" Text="RFID" />
+                                <TextBlock Grid.Row="0" Grid.Column="3" Text="Done" />
+                                <Border Grid.Row="1" Grid.ColumnSpan="4" Margin="0,10,0,10" BorderBrush="{ThemeResource SystemControlForegroundBaseMediumLowBrush}" BorderThickness="1" />
+                            </Grid>
+                        </ListView.Header>
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="models:RFIDUnit">
+                                <Grid ColumnSpacing="16">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120" />
+                                        <ColumnDefinition Width="120" />
+                                        <ColumnDefinition Width="120" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="{x:Bind CycleUnit}" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1" Text="{x:Bind ProgramName}" VerticalAlignment="Center" />
+                                    <Button Grid.Column="2" Content="Program Tag" Click="Program_Button_Click" VerticalAlignment="Center" />
+                                    <CheckBox Grid.Column="3" IsChecked="{x:Bind IsDone, Mode=TwoWay}" VerticalAlignment="Center" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                        <ListView.ItemContainerStyle>
+                            <Style BasedOn="{StaticResource DefaultListViewItemStyle}"
+                                    TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                    </ListView>
+                </Grid>
+            </Border>
+        </Grid>
     </Grid>
 </Page>

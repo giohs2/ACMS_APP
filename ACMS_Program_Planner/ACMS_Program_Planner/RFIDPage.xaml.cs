@@ -1,4 +1,5 @@
 ﻿using ACMS_Program_Planner.Models;
+using ACMS_Program_Planner.Services;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -8,11 +9,12 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 
@@ -30,7 +32,8 @@ public sealed partial class RFIDPage : Page
     private SerialPort? serialPort;
 
     public SettingsModel ViewModel { get; } = SettingsModel.Instance;
-
+    public ObservableCollection<ServicePlanItem> ServicePlans => DataService.Instance.ServicePlans;
+    public ObservableCollection<RFIDUnit> RFIDUnits = new ObservableCollection<RFIDUnit>();
 
     public RFIDPage()
     {
@@ -140,7 +143,7 @@ public sealed partial class RFIDPage : Page
 
         try
         {
-            string textToSend = SendDataTextBox.Text;
+            string textToSend = SendDataTextBox.Text + '\r';
             if (!string.IsNullOrEmpty(textToSend))
             {
                 serialPort.Write(textToSend);
@@ -186,5 +189,59 @@ public sealed partial class RFIDPage : Page
             serialPort.Close();
             serialPort.Dispose();
         }
+    }
+
+    private void CyclesListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+
+    }
+
+    private void PlansListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        // Populate RFIDUnits
+        if (e.AddedItems.Count > 0)
+        {
+            var selectedPlan = e.AddedItems[0] as ServicePlanItem;
+            if (selectedPlan != null)
+            {
+                RFIDUnits.Clear();
+
+                foreach (var cycle in selectedPlan.Cycles)
+                {
+                    foreach (var unitprogram in cycle.UnitPrograms)
+                    {
+                        if (unitprogram.ProgramId > 0)
+                        {
+                            var item = new RFIDUnit()
+                            {
+                                CycleUnit = cycle.Name + ": " + unitprogram.Unit.UnitName,
+                                Program = DataService.Instance.Programs.FirstOrDefault(f => f.Id == unitprogram.ProgramId),
+                                IsDone = false
+                            };
+                            RFIDUnits.Add(item);
+                        }
+                    }
+                }
+            }
+
+        }
+    }
+
+    private void Program_Button_Click(object sender, RoutedEventArgs e)
+    {
+        var button = sender as Button;
+        if (button == null) return;
+
+        var rfidUnit = button.DataContext as RFIDUnit;
+        if (rfidUnit == null) return;
+
+        var program = rfidUnit.Program;
+        
+        // Convert Program to hex data
+
+        // Write to RFID tag
+
+        // If successful, mark as done
+        rfidUnit.IsDone = true;
     }
 }
