@@ -12,9 +12,9 @@ namespace ACMS_Program_Planner.Models
 
         public string? UnitName { get; set; }
 
-        public int DeviceClass { get; set; }
+        public byte DeviceClass { get; set; }
 
-        public int DeviceGroup { get; set; }
+        public byte DeviceGroup { get; set; }
 
         public int DeviceId { get; set; }
     }

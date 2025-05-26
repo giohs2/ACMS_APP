@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ACMS_Program_Planner.Services;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -10,7 +11,18 @@ namespace ACMS_Program_Planner.Models
 {
     public class RFIDUnit : INotifyPropertyChanged
     {
-        public string? CycleUnit { get; set; }
+        public Cycle? Cycle { get; set; }
+
+        public UnitProgram? UnitProgram { get; set; }
+
+        public string? CycleUnit
+        {
+            get
+            {
+                return Cycle.Name + ": " + UnitProgram.Unit.UnitName;
+            }
+        }
+
         public string? ProgramName
         {
             get
@@ -19,7 +31,13 @@ namespace ACMS_Program_Planner.Models
             }
         }
 
-        public ProgramItem? Program { get; set; }
+        public ProgramItem? Program
+        { 
+            get
+            {
+                return DataService.Instance.Programs.FirstOrDefault(f => f.Id == UnitProgram.ProgramId);
+            } 
+        }
 
         private bool _isDone { get; set; }
         public bool IsDone

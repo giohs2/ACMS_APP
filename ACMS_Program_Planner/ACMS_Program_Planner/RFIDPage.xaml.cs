@@ -17,6 +17,8 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using static SkiaSharp.HarfBuzz.SKShaper;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -30,6 +32,8 @@ public sealed partial class RFIDPage : Page
 {
     private bool isConnected = false;
     private SerialPort? serialPort;
+    private string _lastReceivedData = string.Empty;
+    private bool _awaitingResponse = false;
 
     public SettingsModel ViewModel { get; } = SettingsModel.Instance;
     public ObservableCollection<ServicePlanItem> ServicePlans => DataService.Instance.ServicePlans;
@@ -113,15 +117,17 @@ public sealed partial class RFIDPage : Page
         try
         {
             string data = serialPort.ReadExisting();
+            _lastReceivedData = data;
+            _awaitingResponse = false;
 
             // We need to use dispatcher to update UI from a different thread
             DispatcherQueue.TryEnqueue(() =>
             {
-                ReceivedDataTextBox.Text += data;
+                DataTextBox.Text += "RECV: " + data;
 
                 // Auto-scroll to the bottom
-                ReceivedDataTextBox.SelectionStart = ReceivedDataTextBox.Text.Length;
-                ReceivedDataTextBox.SelectionLength = 0;
+                DataTextBox.SelectionStart = DataTextBox.Text.Length;
+                DataTextBox.SelectionLength = 0;
             });
         }
         catch (Exception ex)
@@ -133,7 +139,7 @@ public sealed partial class RFIDPage : Page
         }
     }
 
-    private void Send_Button_Click(object sender, RoutedEventArgs e)
+    private void SendData(string? data)
     {
         if (!isConnected || serialPort == null || !serialPort.IsOpen)
         {
@@ -143,11 +149,25 @@ public sealed partial class RFIDPage : Page
 
         try
         {
-            string textToSend = SendDataTextBox.Text + '\r';
+            if (data == null)
+            {
+                ShowErrorMessage("No data to send");
+                return;
+            }
+
+            string textToSend = data + '\r';
             if (!string.IsNullOrEmpty(textToSend))
             {
                 serialPort.Write(textToSend);
-                StatusTextBlock.Text = "Data sent successfully";
+                DispatcherQueue.TryEnqueue(() =>
+                {
+                    DataTextBox.Text += "SENT: " + textToSend;
+
+                    // Auto-scroll to the bottom
+                    DataTextBox.SelectionStart = DataTextBox.Text.Length;
+                    DataTextBox.SelectionLength = 0;
+                });
+                
             }
         }
         catch (Exception ex)
@@ -156,21 +176,21 @@ public sealed partial class RFIDPage : Page
         }
     }
 
-    private void Clear_Received_Button_Click(object sender, RoutedEventArgs e)
+    /*private void Clear_Received_Button_Click(object sender, RoutedEventArgs e)
     {
         ReceivedDataTextBox.Text = string.Empty;
-    }
+    }*/
 
     private void UpdateUIState()
     {
         ConnectButton.Content = isConnected ? "Disconnect" : "Connect";
-        SendDataTextBox.IsEnabled = isConnected;
-        Send_Button.IsEnabled = isConnected;
+        DataTextBox.IsEnabled = isConnected;
         ComPortComboBox.IsEnabled = !isConnected;
         BaudRateComboBox.IsEnabled = !isConnected;
         DataBitsComboBox.IsEnabled = !isConnected;
         ParityComboBox.IsEnabled = !isConnected;
         StopBitsComboBox.IsEnabled = !isConnected;
+        OvenProgramListView.IsEnabled = isConnected;
     }
 
     private void ShowErrorMessage(string message)
@@ -214,8 +234,8 @@ public sealed partial class RFIDPage : Page
                         {
                             var item = new RFIDUnit()
                             {
-                                CycleUnit = cycle.Name + ": " + unitprogram.Unit.UnitName,
-                                Program = DataService.Instance.Programs.FirstOrDefault(f => f.Id == unitprogram.ProgramId),
+                                Cycle = cycle,
+                                UnitProgram = unitprogram,
                                 IsDone = false
                             };
                             RFIDUnits.Add(item);
@@ -227,21 +247,188 @@ public sealed partial class RFIDPage : Page
         }
     }
 
+    private byte[] GetFixedLengthString(string? input, int length = 20)
+    {
+        byte[] result = new byte[length];
+
+        // Start with all zeros (null bytes)
+        for (int i = 0; i < length; i++)
+        {
+            result[i] = 0;
+        }
+
+        // If input is null or empty, return array of nulls
+        if (string.IsNullOrEmpty(input))
+        {
+            return result;
+        }
+
+        // Get ASCII bytes
+        byte[] stringBytes = System.Text.Encoding.ASCII.GetBytes(input);
+        int copyLength = Math.Min(stringBytes.Length, length);
+
+        // Copy bytes to result array
+        Array.Copy(stringBytes, result, copyLength);
+
+        return result;
+    }
+
+    private struct StepData
+    {
+        public byte STEP_ID; // full byte (value range: 0-255)
+        public byte[] STEP_NAME; // 20 bytes
+        public UInt16 STEP_DURATION; // full 2 bytes (value range: 0-65535)
+        public byte STEP_PHYSICAL_UNIT; // full byte (value range: 0-255)
+        public Int16 STEP_TARGET_VALUE; // full 2 bytes (value range: -32768-32768)
+        public byte STEP_MODE; // full byte (value range: 0-255)
+        public byte STEP_TERMINATION1; // full byte (value range: 0-255)
+        public byte STEP_TERMINATION2; // full byte (value range: 0-255)
+    }
+
+    private struct ProgramData
+    {
+        public byte PROGRAM_DEVICE_CLASS; // first 5 bits (value range: 0-31)
+        public byte PROGRAM_DEVICE_GROUP; // first 5 bits (value range: 0-31)
+        public byte NUMBER_OF_PROGRAMS; // first 6 bits (value range: 0-63)
+        public byte PROGRAM_NUMBER; // full byte (value range: 0-255)
+        public byte PROGRAM_NUMBER_OF_STEPS; // full byte (value range: 0-255)
+        public byte[] PROGRAM_NAME; // 20 bytes
+        public StepData[] STEPS;
+    }
+
+    private string ProgramToRFID(RFIDUnit rfidunit)
+    {
+        if (rfidunit == null)
+        {
+            return "";
+        }
+
+        ProgramData programData = new ProgramData();
+        programData.PROGRAM_DEVICE_CLASS = rfidunit.UnitProgram.Unit.DeviceClass;
+        programData.PROGRAM_DEVICE_GROUP = rfidunit.UnitProgram.Unit.DeviceGroup;
+        programData.NUMBER_OF_PROGRAMS = 1;
+        programData.PROGRAM_NUMBER = (byte)rfidunit.Program.Id;
+        programData.PROGRAM_NUMBER_OF_STEPS = (byte)rfidunit.Program.StepIds.Count;
+        programData.PROGRAM_NAME = GetFixedLengthString(rfidunit.Program.Name);
+        programData.STEPS = new StepData[rfidunit.Program.StepIds.Count];
+        for (int i = 0; i < rfidunit.Program.StepIds.Count; i++)
+        {
+            var step = DataService.Instance.Steps.FirstOrDefault(s => s.Id == rfidunit.Program.StepIds[i]);
+            if (step != null)
+            {
+                programData.STEPS[i].STEP_ID = (byte)step.Id;
+                programData.STEPS[i].STEP_NAME = GetFixedLengthString(step.Name);
+                programData.STEPS[i].STEP_DURATION = (UInt16)step.DurationSeconds;
+                programData.STEPS[i].STEP_PHYSICAL_UNIT = 0;
+                programData.STEPS[i].STEP_TARGET_VALUE = (Int16)step.FinalTemperature;
+                programData.STEPS[i].STEP_MODE = (byte)(step.IsSteamerActive ? 1 : 0);
+                programData.STEPS[i].STEP_TERMINATION1 = (byte)(step.TerminateIfTimeExpired ? 1 : 0);
+                programData.STEPS[i].STEP_TERMINATION2 = (byte)(step.TerminateIfTemperatureReached ? 2 : 0);
+            }
+        }
+
+        // Convert ProgramData to hex data
+
+        // Calculate exact size needed: 
+        // 2 bytes (header) + 1 byte (program number) + 1 byte (step count) + 
+        // 20 bytes (program name) + (steps * 29 bytes per step)
+        int bytesPerStep = 1 + 20 + 2 + 1 + 2 + 1 + 1 + 1; // 29 bytes per step
+        int dataSize = 2 + 1 + 1 + 20 + (programData.STEPS.Length * bytesPerStep);
+        byte[] hexData = new byte[dataSize];
+        int index = 0;
+
+        ushort combinedValue =  (ushort)(
+                                ((programData.PROGRAM_DEVICE_CLASS & 0x1F) << 11) |  // 5 bits, shifted to positions 11-15
+                                ((programData.PROGRAM_DEVICE_GROUP & 0x1F) << 6) |   // 5 bits, shifted to positions 6-10
+                                (programData.NUMBER_OF_PROGRAMS & 0x3F)              // 6 bits in positions 0-5
+                                );
+
+        hexData[index++] = (byte)((combinedValue >> 8) & 0xFF);
+        hexData[index++] = (byte)(combinedValue & 0xFF);
+        hexData[index++] = programData.PROGRAM_NUMBER;
+        hexData[index++] = programData.PROGRAM_NUMBER_OF_STEPS;
+        for (int i = 0; i < programData.PROGRAM_NAME.Length; i++)
+        {
+            hexData[index++] = programData.PROGRAM_NAME[i];
+        }
+        for (int i = 0; i < programData.STEPS.Length; i++)
+        {
+            hexData[index++] = programData.STEPS[i].STEP_ID;
+            for (int j = 0; j < programData.STEPS[i].STEP_NAME.Length; j++)
+            {
+                hexData[index++] = programData.STEPS[i].STEP_NAME[j];
+            }
+            hexData[index++] = (byte)(programData.STEPS[i].STEP_DURATION >> 8);
+            hexData[index++] = (byte)(programData.STEPS[i].STEP_DURATION & 0xFF);
+            hexData[index++] = programData.STEPS[i].STEP_PHYSICAL_UNIT;
+            hexData[index++] = (byte)(programData.STEPS[i].STEP_TARGET_VALUE >> 8);
+            hexData[index++] = (byte)(programData.STEPS[i].STEP_TARGET_VALUE & 0xFF);
+            hexData[index++] = programData.STEPS[i].STEP_MODE;
+            hexData[index++] = programData.STEPS[i].STEP_TERMINATION1;
+            hexData[index++] = programData.STEPS[i].STEP_TERMINATION2;
+        }
+
+        // return hexData as string
+        string hexString = BitConverter.ToString(hexData).Replace("-", "");
+        return hexString;
+    }
+
+
     private void Program_Button_Click(object sender, RoutedEventArgs e)
     {
-        var button = sender as Button;
-        if (button == null) return;
+        // First send SearchTag
+        _awaitingResponse = true;
+        _lastReceivedData = string.Empty;
+        SendData("050020");
 
-        var rfidUnit = button.DataContext as RFIDUnit;
-        if (rfidUnit == null) return;
+        // Wait for response
+        while (_awaitingResponse)
+        {
+            // Small delay to prevent CPU hogging
+            Task.Delay(50).Wait();
+        }
 
-        var program = rfidUnit.Program;
-        
-        // Convert Program to hex data
+        // Check if we got a valid response
+        if (_lastReceivedData.StartsWith("0001"))
+        {
+            var button = sender as Button;
+            if (button == null) return;
 
-        // Write to RFID tag
+            var rfidUnit = button.DataContext as RFIDUnit;
+            if (rfidUnit == null) return;
 
-        // If successful, mark as done
-        rfidUnit.IsDone = true;
+            var r = ProgramToRFID(rfidUnit);
+
+            // Write to RFID tag (ISO15693_WriteSingleBlock)
+            _awaitingResponse = true;
+            _lastReceivedData = string.Empty;
+            SendData("0D07" + "0000" + (r.Length / 2).ToString("X") + r);
+            //SendData("0D07" + "0000" + "01FF");
+
+            // Wait for response
+            while (_awaitingResponse)
+            {
+                // Small delay to prevent CPU hogging
+                Task.Delay(50).Wait();
+            }
+
+            // Check if we got a valid response
+            if (_lastReceivedData.StartsWith("0001"))
+            {
+                _lastReceivedData = string.Empty;
+                // Send a beep
+                SendData("0407506009C800C800");
+                // Mark as done
+                rfidUnit.IsDone = true;
+            }
+            else
+            {
+                ShowErrorMessage("Failed to write program to RFID tag");
+            }
+        }
+        else
+        {
+            ShowErrorMessage("Failed to detect RFID tag");
+        }
     }
 }
