@@ -14,9 +14,30 @@ namespace ACMS_Program_Planner.Models
     {
         private DispatcherQueue? _dispatcherQueue;
 
+        // Singleton pattern to ensure the settings can be accessed globally
+        private static SettingsModel? _instance;
+        public static SettingsModel Instance => _instance ??= new SettingsModel();
+
+        public static void Initialize(DispatcherQueue dispatcherQueue)
+        {
+            if (_instance == null)
+            {
+                _instance = new SettingsModel();
+            }
+            _instance._dispatcherQueue = dispatcherQueue;
+        }
+
+        private SettingsModel()
+        {
+            // Initialize with default values or load from storage
+            InitializeComPorts();
+            StartComPortMonitoring();
+            LoadSettings();
+        }
+
         // RFID Settings
-        private ObservableCollection<string>? _comPorts;
-        public ObservableCollection<string>? ComPorts
+        private ObservableCollection<string> _comPorts = new ObservableCollection<string>();
+        public ObservableCollection<string> ComPorts
         {
             get => _comPorts;
             set => SetProperty(ref _comPorts, value);
@@ -130,6 +151,8 @@ namespace ACMS_Program_Planner.Models
         private void InitializeComPorts()
         {
             _comPorts = new ObservableCollection<string>(SerialPort.GetPortNames());
+            if (ComPorts.Count > 0)
+                SelectedComPort = ComPorts.First();
         }
 
         private Timer? _comPortMonitorTimer;
@@ -173,27 +196,6 @@ namespace ACMS_Program_Planner.Models
                     }
                 });
             }
-        }
-
-        // Singleton pattern to ensure the settings can be accessed globally
-        private static SettingsModel? _instance;
-        public static SettingsModel Instance => _instance ??= new SettingsModel();
-
-        public static void Initialize(DispatcherQueue dispatcherQueue)
-        {
-            if (_instance == null)
-            {
-                _instance = new SettingsModel();
-            }
-            _instance._dispatcherQueue = dispatcherQueue;
-        }
-
-        private SettingsModel()
-        {
-            // Initialize with default values or load from storage
-            InitializeComPorts();
-            StartComPortMonitoring();
-            LoadSettings();
         }
     }
 }
