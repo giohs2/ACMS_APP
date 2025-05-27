@@ -1,71 +1,32 @@
-﻿using System;
+﻿using Microsoft.UI.Dispatching;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO.Ports;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Timers;
 
 namespace ACMS_Program_Planner.Models
 {
     public class SettingsModel : INotifyPropertyChanged
     {
-        // Database connection settings
-        /*private string _serverAddress;
-        public string ServerAddress
-        {
-            get => _serverAddress;
-            set => SetProperty(ref _serverAddress, value);
-        }
-
-        private string _databaseName;
-        public string DatabaseName
-        {
-            get => _databaseName;
-            set => SetProperty(ref _databaseName, value);
-        }
-
-        private string _username;
-        public string Username
-        {
-            get => _username;
-            set => SetProperty(ref _username, value);
-        }
-
-        private string _password;
-        public string Password
-        {
-            get => _password;
-            set => SetProperty(ref _password, value);
-        }
-
-        // Application settings
-        private bool _darkModeEnabled;
-        public bool DarkModeEnabled
-        {
-            get => _darkModeEnabled;
-            set => SetProperty(ref _darkModeEnabled, value);
-        }
-
-        private int _refreshInterval = 60; // Default 60 seconds
-        public int RefreshInterval
-        {
-            get => _refreshInterval;
-            set => SetProperty(ref _refreshInterval, value);
-        }*/
+        private DispatcherQueue? _dispatcherQueue;
 
         // RFID Settings
-        private string _selectedComPort = "COM1";
+        private ObservableCollection<string>? _comPorts;
+        public ObservableCollection<string>? ComPorts
+        {
+            get => _comPorts;
+            set => SetProperty(ref _comPorts, value);
+        }
+
+        private string _selectedComPort = string.Empty;
         public string SelectedComPort
         {
             get => _selectedComPort;
             set => SetProperty(ref _selectedComPort, value);
-        }
-
-        private ObservableCollection<string> _comPorts = [ "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "COM10" ];
-        public ObservableCollection<string> ComPorts
-        {
-            get => _comPorts;
-            set => SetProperty(ref _comPorts, value);
         }
 
         private ObservableCollection<int> _baudRates = [300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200];
@@ -166,13 +127,72 @@ namespace ACMS_Program_Planner.Models
             // Implement loading settings from local storage or configuration file
         }
 
+        private void InitializeComPorts()
+        {
+            _comPorts = new ObservableCollection<string>(SerialPort.GetPortNames());
+        }
+
+        private Timer? _comPortMonitorTimer;
+
+        private void StartComPortMonitoring()
+        {
+            _comPortMonitorTimer = new Timer(2000); // Check every 2 seconds
+            _comPortMonitorTimer.Elapsed += CheckForNewComPorts;
+            _comPortMonitorTimer.Start();
+        }
+
+        private void CheckForNewComPorts(object? sender, ElapsedEventArgs e)
+        {
+            var currentPorts = SerialPort.GetPortNames();
+            var newPorts = currentPorts.Except(ComPorts ?? Enumerable.Empty<string>()).ToList();
+
+            if (_dispatcherQueue != null)
+            {
+                _dispatcherQueue.TryEnqueue(() =>
+                {
+                    if (currentPorts.Length == 0)
+                    {
+                        ComPorts?.Clear();
+                        OnPropertyChanged(nameof(ComPorts));
+                    }
+                    else
+                    {
+                        foreach (var port in newPorts)
+                        {
+                            ComPorts?.Add(port);
+                        }
+                        if (newPorts.Count > 0)
+                        {
+                            OnPropertyChanged(nameof(ComPorts));
+                            // Automatically select the first available COM port if not already selected
+                            if (ComPorts != null && ComPorts.Any() && string.IsNullOrEmpty(SelectedComPort))
+                            {
+                                SelectedComPort = ComPorts.First();
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
         // Singleton pattern to ensure the settings can be accessed globally
         private static SettingsModel? _instance;
         public static SettingsModel Instance => _instance ??= new SettingsModel();
 
+        public static void Initialize(DispatcherQueue dispatcherQueue)
+        {
+            if (_instance == null)
+            {
+                _instance = new SettingsModel();
+            }
+            _instance._dispatcherQueue = dispatcherQueue;
+        }
+
         private SettingsModel()
         {
             // Initialize with default values or load from storage
+            InitializeComPorts();
+            StartComPortMonitoring();
             LoadSettings();
         }
     }

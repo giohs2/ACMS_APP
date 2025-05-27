@@ -11,7 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.IO.Ports;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
@@ -31,18 +30,25 @@ namespace ACMS_Program_Planner;
 public sealed partial class RFIDPage : Page
 {
     private bool isConnected = false;
-    private SerialPort? serialPort;
-    private string _lastReceivedData = string.Empty;
-    private bool _awaitingResponse = false;
+    private readonly RFIDService rfidService;
 
-    public SettingsModel ViewModel { get; } = SettingsModel.Instance;
+    public SettingsModel ViewModel { get => SettingsModel.Instance; }
+
     public ObservableCollection<ServicePlanItem> ServicePlans => DataService.Instance.ServicePlans;
     public ObservableCollection<RFIDUnit> RFIDUnits = new ObservableCollection<RFIDUnit>();
 
     public RFIDPage()
     {
         InitializeComponent();
+        SettingsModel.Initialize(DispatcherQueue);
+
         DataContext = ViewModel;
+
+        // Use RFIDService
+        rfidService = new RFIDService(DispatcherQueue);
+        rfidService.DataReceived += OnRFIDDataReceived;
+        rfidService.ErrorOccurred += ShowErrorMessage;
+        rfidService.ConnectionChanged += OnRFIDConnectionChanged;
 
         // Initialize UI state
         UpdateUIState();
@@ -50,136 +56,40 @@ public sealed partial class RFIDPage : Page
 
     private void Connect_Button_Click(object sender, RoutedEventArgs e)
     {
-        if (!isConnected)
+        if (!rfidService.IsConnected)
         {
-            try
-            {
-                // Create and configure the serial port
-                serialPort = new SerialPort
-                {
-                    PortName = ViewModel.SelectedComPort,
-                    BaudRate = ViewModel.SelectedBaudRate,
-                    DataBits = ViewModel.SelectedDataBit,
-                    Parity = ViewModel.SelectedParity,
-                    StopBits = ViewModel.SelectedStopBit,
-                    ReadTimeout = 500,
-                    WriteTimeout = 500
-                };
-
-                // Set up data received event handler
-                serialPort.DataReceived += SerialPort_DataReceived;
-
-                // Open the connection
-                serialPort.Open();
-
-                isConnected = true;
-                StatusTextBlock.Text = $"Connected to {ViewModel.SelectedComPort}";
-
-                // Update UI
-                UpdateUIState();
-            }
-            catch (Exception ex)
-            {
-                ShowErrorMessage($"Failed to connect: {ex.Message}");
-            }
+            rfidService.Connect(ViewModel);
+            // After connect, initialize LEDs and wait for response
+            _ = InitializeRFIDAsync();
         }
         else
         {
-            try
-            {
-                // Close the connection
-                if (serialPort != null && serialPort.IsOpen)
-                {
-                    serialPort.DataReceived -= SerialPort_DataReceived;
-                    serialPort.Close();
-                    serialPort.Dispose();
-                    serialPort = null;
-                }
-
-                isConnected = false;
-                StatusTextBlock.Text = "Disconnected";
-
-                // Update UI
-                UpdateUIState();
-            }
-            catch (Exception ex)
-            {
-                ShowErrorMessage($"Failed to disconnect: {ex.Message}");
-            }
+            rfidService.Disconnect();
         }
     }
 
-    private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
+    private async Task InitializeRFIDAsync()
     {
-        if (serialPort == null || !serialPort.IsOpen)
-            return;
-
-        try
+        var response = await rfidService.SendCommandAndWaitAsync(rfidService.Command.InitializeLEDs());
+        if (response.StartsWith("00"))
         {
-            string data = serialPort.ReadExisting();
-            _lastReceivedData = data;
-            _awaitingResponse = false;
-
-            // We need to use dispatcher to update UI from a different thread
-            DispatcherQueue.TryEnqueue(() =>
-            {
-                DataTextBox.Text += "RECV: " + data;
-
-                // Auto-scroll to the bottom
-                DataTextBox.SelectionStart = DataTextBox.Text.Length;
-                DataTextBox.SelectionLength = 0;
-            });
-        }
-        catch (Exception ex)
-        {
-            DispatcherQueue.TryEnqueue(() =>
-            {
-                ShowErrorMessage($"Error reading data: {ex.Message}");
-            });
+            rfidService.SendData(rfidService.Command.TurnOnGreenLED());
         }
     }
 
-    private void SendData(string? data)
+    private void OnRFIDConnectionChanged(bool connected)
     {
-        if (!isConnected || serialPort == null || !serialPort.IsOpen)
-        {
-            ShowErrorMessage("Not connected to a serial port");
-            return;
-        }
-
-        try
-        {
-            if (data == null)
-            {
-                ShowErrorMessage("No data to send");
-                return;
-            }
-
-            string textToSend = data + '\r';
-            if (!string.IsNullOrEmpty(textToSend))
-            {
-                serialPort.Write(textToSend);
-                DispatcherQueue.TryEnqueue(() =>
-                {
-                    DataTextBox.Text += "SENT: " + textToSend;
-
-                    // Auto-scroll to the bottom
-                    DataTextBox.SelectionStart = DataTextBox.Text.Length;
-                    DataTextBox.SelectionLength = 0;
-                });
-                
-            }
-        }
-        catch (Exception ex)
-        {
-            ShowErrorMessage($"Failed to send data: {ex.Message}");
-        }
+        isConnected = connected;
+        StatusTextBlock.Text = connected ? $"Connected to {ViewModel.SelectedComPort}" : "Disconnected";
+        UpdateUIState();
     }
 
-    /*private void Clear_Received_Button_Click(object sender, RoutedEventArgs e)
+    private void OnRFIDDataReceived(string data)
     {
-        ReceivedDataTextBox.Text = string.Empty;
-    }*/
+        DataTextBox.Text += data;
+        DataTextBox.SelectionStart = DataTextBox.Text.Length;
+        DataTextBox.SelectionLength = 0;
+    }
 
     private void UpdateUIState()
     {
@@ -201,19 +111,7 @@ public sealed partial class RFIDPage : Page
     protected override void OnNavigatedFrom(NavigationEventArgs e)
     {
         base.OnNavigatedFrom(e);
-
-        // Clean up resources when navigating away
-        if (serialPort != null && serialPort.IsOpen)
-        {
-            serialPort.DataReceived -= SerialPort_DataReceived;
-            serialPort.Close();
-            serialPort.Dispose();
-        }
-    }
-
-    private void CyclesListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-
+        rfidService.Cleanup();
     }
 
     private void PlansListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -373,23 +271,12 @@ public sealed partial class RFIDPage : Page
         return hexString;
     }
 
-
-    private void Program_Button_Click(object sender, RoutedEventArgs e)
+    private async void Program_Button_Click(object sender, RoutedEventArgs e)
     {
         // First send SearchTag
-        _awaitingResponse = true;
-        _lastReceivedData = string.Empty;
-        SendData("050020");
+        var response = await rfidService.SendCommandAndWaitAsync(rfidService.Command.SearchTag());
 
-        // Wait for response
-        while (_awaitingResponse)
-        {
-            // Small delay to prevent CPU hogging
-            Task.Delay(50).Wait();
-        }
-
-        // Check if we got a valid response
-        if (_lastReceivedData.StartsWith("0001"))
+        if (response.StartsWith("0001"))
         {
             var button = sender as Button;
             if (button == null) return;
@@ -400,35 +287,35 @@ public sealed partial class RFIDPage : Page
             var r = ProgramToRFID(rfidUnit);
 
             // Write to RFID tag (ISO15693_WriteSingleBlock)
-            _awaitingResponse = true;
-            _lastReceivedData = string.Empty;
-            SendData("0D07" + "0000" + (r.Length / 2).ToString("X") + r);
-            //SendData("0D07" + "0000" + "01FF");
+            var writeResponse = await rfidService.SendCommandAndWaitAsync(rfidService.Command.ISO15693_WriteSingleBlock(0, r));
 
-            // Wait for response
-            while (_awaitingResponse)
+            if (writeResponse.StartsWith("0001"))
             {
-                // Small delay to prevent CPU hogging
-                Task.Delay(50).Wait();
-            }
-
-            // Check if we got a valid response
-            if (_lastReceivedData.StartsWith("0001"))
-            {
-                _lastReceivedData = string.Empty;
                 // Send a beep
-                SendData("0407506009C800C800");
+                rfidService.SendData(rfidService.Command.BeepShort());
                 // Mark as done
                 rfidUnit.IsDone = true;
             }
             else
             {
                 ShowErrorMessage("Failed to write program to RFID tag");
+                rfidService.SendData(rfidService.Command.TurnOffGreenLED());
+                rfidService.SendData(rfidService.Command.TurnOnRedLED());
+                rfidService.SendData(rfidService.Command.BeepLong());
+                await Task.Delay(3000);
+                rfidService.SendData(rfidService.Command.TurnOffRedLED());
+                rfidService.SendData(rfidService.Command.TurnOnGreenLED());
             }
         }
         else
         {
             ShowErrorMessage("Failed to detect RFID tag");
+            rfidService.SendData(rfidService.Command.TurnOffGreenLED());
+            rfidService.SendData(rfidService.Command.TurnOnRedLED());
+            rfidService.SendData(rfidService.Command.BeepLong());
+            await Task.Delay(3000);
+            rfidService.SendData(rfidService.Command.TurnOffRedLED());
+            rfidService.SendData(rfidService.Command.TurnOnGreenLED());
         }
     }
 }
