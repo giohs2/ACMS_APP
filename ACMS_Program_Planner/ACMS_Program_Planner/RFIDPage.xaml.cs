@@ -194,17 +194,35 @@ public sealed partial class RFIDPage : Page
         public StepData[] STEPS;
     }
 
-    private string ProgramToRFID(RFIDUnit rfidunit)
+    private string? ProgramToString(RFIDUnit rfidunit)
     {
         if (rfidunit == null)
         {
-            return "";
+            return null;
         }
 
         ProgramData programData = new ProgramData();
-        programData.PROGRAM_DEVICE_CLASS = rfidunit.UnitProgram.Unit.DeviceClass;
-        programData.PROGRAM_DEVICE_GROUP = rfidunit.UnitProgram.Unit.DeviceGroup;
+        if (rfidunit.UnitProgram != null && rfidunit.UnitProgram.Unit != null)
+        {
+            programData.PROGRAM_DEVICE_CLASS = rfidunit.UnitProgram.Unit.DeviceClass;
+            programData.PROGRAM_DEVICE_GROUP = rfidunit.UnitProgram.Unit.DeviceGroup;
+        }
+        else
+        {
+            ShowErrorMessage("Program data is incomplete");
+            return null;
+        }
         programData.NUMBER_OF_PROGRAMS = 1;
+        if (rfidunit.Program == null)
+        {
+            ShowErrorMessage("No program found for RFID unit");
+            return null;
+        }
+        if (rfidunit.Program.StepIds.Count == 0)
+        {
+            ShowErrorMessage("Program has no steps defined");
+            return null;
+        }
         programData.PROGRAM_NUMBER = (byte)rfidunit.Program.Id;
         programData.PROGRAM_NUMBER_OF_STEPS = (byte)rfidunit.Program.StepIds.Count;
         programData.PROGRAM_NAME = GetFixedLengthString(rfidunit.Program.Name);
@@ -284,7 +302,8 @@ public sealed partial class RFIDPage : Page
             var rfidUnit = button.DataContext as RFIDUnit;
             if (rfidUnit == null) return;
 
-            var r = ProgramToRFID(rfidUnit);
+            var r = ProgramToString(rfidUnit);
+            if (r == null) return;
 
             // Write to RFID tag (ISO15693_WriteSingleBlock)
             var writeResponse = await rfidService.SendCommandAndWaitAsync(rfidService.Command.ISO15693_WriteSingleBlock(0, r));

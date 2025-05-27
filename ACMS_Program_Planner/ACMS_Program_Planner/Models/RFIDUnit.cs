@@ -19,7 +19,9 @@ namespace ACMS_Program_Planner.Models
         {
             get
             {
-                return Cycle.Name + ": " + UnitProgram.Unit.UnitName;
+                if (Cycle != null && UnitProgram != null && UnitProgram.Unit != null)
+                    return Cycle.Name + ": " + UnitProgram.Unit.UnitName;
+                return string.Empty;
             }
         }
 
@@ -27,6 +29,8 @@ namespace ACMS_Program_Planner.Models
         {
             get
             {
+                if (Program == null)
+                    return string.Empty;
                 return Program.Name;
             }
         }
@@ -35,6 +39,8 @@ namespace ACMS_Program_Planner.Models
         { 
             get
             {
+                if (UnitProgram == null)
+                    return null;
                 return DataService.Instance.Programs.FirstOrDefault(f => f.Id == UnitProgram.ProgramId);
             } 
         }
