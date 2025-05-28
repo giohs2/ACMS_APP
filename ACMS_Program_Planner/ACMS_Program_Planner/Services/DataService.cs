@@ -185,7 +185,7 @@ namespace ACMS_Program_Planner.Services
                     CycleId = 1,
                     Name = "Cycle 1: " + unit.UnitName,
                     ProgramId = 1,
-                    StartOffset = 0.0f
+                    //StartOffset = 0.0f
                 });
             }
 
@@ -208,7 +208,7 @@ namespace ACMS_Program_Planner.Services
                     CycleId = 2,
                     Name = "Cycle 2: " + unit.UnitName,
                     ProgramId = 1,
-                    StartOffset = 0.0f
+                    //StartOffset = 0.0f
                 });
             }
 

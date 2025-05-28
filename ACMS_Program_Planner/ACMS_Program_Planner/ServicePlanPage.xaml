@@ -131,7 +131,7 @@
                         </TreeView>
                         <StackPanel Grid.Column="1" x:Name="ItemDetails" Visibility="Collapsed" Margin="10">
                             <TextBlock x:Name="ItemTitle" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0, 0, 0, 12" />
-                            <TimePicker x:Name="TimeBetween" Header="Delay Next Step by" Margin="0, 0, 0, 12" SelectedTimeChanged="TimeBetween_SelectedTimeChanged"/>
+                            <TimePicker x:Name="CycleSchedule" Header="Service Cycle Schedule" Margin="0, 0, 0, 12" SelectedTimeChanged="CycleSchedule_SelectedTimeChanged"/>
                             <TextBlock x:Name="ProgramsComboBoxTitle" Margin="0, 0, 0, 12" />
                             <ComboBox x:Name="ProgramsComboBox" Margin="0, 0, 0, 12"
                                 DisplayMemberPath="Name"
@@ -139,9 +139,9 @@
                                 SelectedItem="{Binding Program, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                 HorizontalAlignment="Left"
                                 HorizontalContentAlignment="Left" SelectionChanged="ProgramsComboBox_SelectionChanged" />
-                            <TextBlock x:Name="StartOffsetNumberBoxTitle" Margin="0, 0, 0, 12" />
+                            <!--TextBlock x:Name="StartOffsetNumberBoxTitle" Margin="0, 0, 0, 12" />
                             <NumberBox x:Name="StartOffsetNumberBox" MaxWidth="120" ValueChanged="StartOffsetNumberBox_ValueChanged"
-                                Minimum="0" SpinButtonPlacementMode="Compact" HorizontalAlignment="Left" />
+                                Minimum="0" SpinButtonPlacementMode="Compact" HorizontalAlignment="Left" /-->
                         </StackPanel>
                         
                         

@@ -40,7 +40,10 @@ namespace ACMS_Program_Planner.Services
 
         public string ISO15693_WriteSingleBlock(ushort block, string data)
         {
-            return "0D07" + block.ToString("X4") + (data.Length / 2).ToString("X") + data;
+            string blockHex = ((byte)block).ToString("X2") + ((byte)(block >> 8)).ToString("X2");
+            // Ensure data is 8 hex digits (4 bytes)
+            data = data.PadRight(8, '0');
+            return "0D07" + blockHex + "04" + data;
         }
 
         public string BeepShort()

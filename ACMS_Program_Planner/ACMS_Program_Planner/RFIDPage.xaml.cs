@@ -70,7 +70,7 @@ public sealed partial class RFIDPage : Page
 
     private async Task InitializeRFIDAsync()
     {
-        var response = await rfidService.SendCommandAndWaitAsync(rfidService.Command.InitializeLEDs());
+        var response = await rfidService.SendCommandAndWaitAsync(rfidService.Command.InitializeLEDs(), 2);
         if (response.StartsWith("00"))
         {
             rfidService.SendData(rfidService.Command.TurnOnGreenLED());
@@ -289,10 +289,37 @@ public sealed partial class RFIDPage : Page
         return hexString;
     }
 
+    private async Task<string> WriteDataToTag(int startBlock, string data)
+    {
+        // Split the data into blocks of 4 bytes each (8 hex characters per block)
+        int blockSize = 8;
+        int totalBlocks = (int)Math.Ceiling(data.Length / (double)blockSize);
+        int rem = data.Length % blockSize; // Remaining characters in the last block
+        if (rem > 0)
+        {
+            // Pad the last block with zeros if it has less than 8 characters
+            data = data.PadRight(totalBlocks * blockSize, '0');
+        }
+
+        for (int i = 0; i < totalBlocks; i++)
+        {
+            // Extract the block data (4 bytes = 8 hex characters)
+            string blockData = data.Substring(i * 8, 8);
+
+            var writeResponse = await rfidService.SendCommandAndWaitAsync(rfidService.Command.ISO15693_WriteSingleBlock((ushort)i, blockData), 4);
+            if (!writeResponse.StartsWith("0001"))
+            {
+                // If any block write fails, return the error response
+                return writeResponse;
+            }
+        }
+        return "0001"; // Return success response
+    }
+
     private async void Program_Button_Click(object sender, RoutedEventArgs e)
     {
         // First send SearchTag
-        var response = await rfidService.SendCommandAndWaitAsync(rfidService.Command.SearchTag());
+        var response = await rfidService.SendCommandAndWaitAsync(rfidService.Command.SearchTag(), 18);
 
         if (response.StartsWith("0001"))
         {
@@ -306,7 +333,7 @@ public sealed partial class RFIDPage : Page
             if (r == null) return;
 
             // Write to RFID tag (ISO15693_WriteSingleBlock)
-            var writeResponse = await rfidService.SendCommandAndWaitAsync(rfidService.Command.ISO15693_WriteSingleBlock(0, r));
+            var writeResponse = await WriteDataToTag(0, r);
 
             if (writeResponse.StartsWith("0001"))
             {

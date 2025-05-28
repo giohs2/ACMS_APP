@@ -16,6 +16,7 @@ namespace ACMS_Program_Planner.Services
         private bool isConnected = false;
         private string _lastReceivedData = string.Empty;
         private bool _awaitingResponse = false;
+        private int _expectedReplyLength = 0;
         private readonly RFIDCommandTWN4 twn4Command = new RFIDCommandTWN4();
         private readonly DispatcherQueue dispatcherQueue;
 
@@ -118,15 +119,29 @@ namespace ACMS_Program_Planner.Services
             }
         }
 
-        public async Task<string> SendCommandAndWaitAsync(string command)
+        public async Task<string> SendCommandAndWaitAsync(string command, int expectedReplyLength)
         {
             _awaitingResponse = true;
             _lastReceivedData = string.Empty;
+            _expectedReplyLength = expectedReplyLength;
+
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3)); // Set timeout to 3 seconds
             SendData(command);
-            while (_awaitingResponse)
+
+            try
             {
-                await Task.Delay(50);
+                while (_awaitingResponse)
+                {
+                    await Task.Delay(50, cts.Token); // Pass the cancellation token to the delay
+                }
             }
+            catch (TaskCanceledException)
+            {
+                _awaitingResponse = false; // Ensure the flag is reset
+                ErrorOccurred?.Invoke("Timeout waiting for response");
+                return "Timeout"; // Return a timeout message or handle as needed
+            }
+
             return _lastReceivedData;
         }
 
@@ -137,8 +152,14 @@ namespace ACMS_Program_Planner.Services
             try
             {
                 string data = serialPort.ReadExisting();
-                _lastReceivedData = data;
-                _awaitingResponse = false;
+                _lastReceivedData += data;
+
+                // Wait until the expected number of bytes has been received
+                if (_expectedReplyLength > 0 && _lastReceivedData.Length >= _expectedReplyLength)
+                {
+                    _awaitingResponse = false;
+                }
+
                 dispatcherQueue.TryEnqueue(() =>
                 {
                     DataReceived?.Invoke("RECV: " + data);

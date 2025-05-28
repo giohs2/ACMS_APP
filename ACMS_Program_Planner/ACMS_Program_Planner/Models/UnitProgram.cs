@@ -14,7 +14,7 @@ namespace ACMS_Program_Planner.Models
         private int _cycleId;
         private string? _name;
         private int _programId;
-        private double _startOffset;
+        //private double _startOffset;
 
         public Unit? Unit
         {
@@ -68,7 +68,7 @@ namespace ACMS_Program_Planner.Models
             }
         }
 
-        public double StartOffset
+        /*public double StartOffset
         {
             get => _startOffset;
             set
@@ -79,7 +79,7 @@ namespace ACMS_Program_Planner.Models
                     OnPropertyChanged(nameof(StartOffset));
                 }
             }
-        }
+        }*/
 
         public event PropertyChangedEventHandler? PropertyChanged;
 

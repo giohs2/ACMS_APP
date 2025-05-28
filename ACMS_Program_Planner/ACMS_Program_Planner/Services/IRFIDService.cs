@@ -17,7 +17,7 @@ namespace ACMS_Program_Planner.Services
         void Cleanup();
 
         void SendData(string? data);
-        Task<string> SendCommandAndWaitAsync(string command);
+        Task<string> SendCommandAndWaitAsync(string command, int expectedReplyLength);
 
         RFIDCommandTWN4 Command { get; }
     }

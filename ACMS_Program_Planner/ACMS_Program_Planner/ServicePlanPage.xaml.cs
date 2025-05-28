@@ -114,7 +114,7 @@ namespace ACMS_Program_Planner
                     CycleId = ServiceSteps.Count + 1,
                     Name = "Cycle " + (ServiceSteps.Count + 1).ToString() + ": " + unit.UnitName,
                     ProgramId = -1,
-                    StartOffset = 0.0f
+                    //StartOffset = 0.0f
                 });
             }
 
@@ -195,18 +195,18 @@ namespace ACMS_Program_Planner
                 selectedStep = selectedItem;
                 ItemTitle.Text = selectedItem.Name;
 
-                TimeBetween.SelectedTime = selectedItem.Delay;
-                TimeBetween.Visibility = Visibility.Visible;
+                CycleSchedule.SelectedTime = selectedItem.Delay;
+                CycleSchedule.Visibility = Visibility.Visible;
 
                 ProgramsComboBoxTitle.Visibility = Visibility.Collapsed;
                 ProgramsComboBox.Visibility = Visibility.Collapsed;
-                StartOffsetNumberBoxTitle.Visibility = Visibility.Collapsed;
-                StartOffsetNumberBox.Visibility = Visibility.Collapsed;
+                //StartOffsetNumberBoxTitle.Visibility = Visibility.Collapsed;
+                //StartOffsetNumberBox.Visibility = Visibility.Collapsed;
             }
             else if (args.AddedItems.Count > 0 && args.AddedItems[0] is UnitProgram selectedUnit)
             {
                 selectedStep = ServiceSteps.FirstOrDefault(x => x.CycleId == selectedUnit.CycleId);
-                TimeBetween.Visibility = Visibility.Collapsed;
+                CycleSchedule.Visibility = Visibility.Collapsed;
                 selectedUnitProgram = selectedUnit;
                 ItemTitle.Text = selectedUnit.Name;
 
@@ -217,23 +217,23 @@ namespace ACMS_Program_Planner
                 var selectedProgram = DataService.Instance.Programs.FirstOrDefault(f => f.Id == selectedUnit?.ProgramId);
                 ProgramsComboBox.SelectedItem = selectedProgram;
 
-                StartOffsetNumberBoxTitle.Visibility = Visibility.Visible;
-                StartOffsetNumberBoxTitle.Text = "Start Offset [sec]";
-                StartOffsetNumberBox.Visibility = Visibility.Visible;
-                StartOffsetNumberBox.Value = selectedUnit.StartOffset;
+                //StartOffsetNumberBoxTitle.Visibility = Visibility.Visible;
+                //StartOffsetNumberBoxTitle.Text = "Start Offset [sec]";
+                //StartOffsetNumberBox.Visibility = Visibility.Visible;
+                //StartOffsetNumberBox.Value = selectedUnit.StartOffset;
             }
         }
 
-        private void TimeBetween_SelectedTimeChanged(TimePicker sender, TimePickerSelectedValueChangedEventArgs args)
+        private void CycleSchedule_SelectedTimeChanged(TimePicker sender, TimePickerSelectedValueChangedEventArgs args)
         {
-            var step = ServiceSteps.FirstOrDefault(x => x.CycleId == selectedStep?.CycleId);
-            if (step != null)
+            var cycle = ServiceSteps.FirstOrDefault(x => x.CycleId == selectedStep?.CycleId);
+            if (cycle != null)
             {
-                step.Delay = args.NewTime;
+                cycle.Delay = args.NewTime;
             }
         }
 
-        private void StartOffsetNumberBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
+        /*private void StartOffsetNumberBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
         {
             var step = ServiceSteps.FirstOrDefault(x => x.CycleId == selectedStep?.CycleId);
             if (step != null)
@@ -244,7 +244,7 @@ namespace ACMS_Program_Planner
                     unitProgram.StartOffset = (float)args.NewValue;
                 }
             }
-        }
+        }*/
     }
 
     class CycleItemTemplateSelector : DataTemplateSelector
