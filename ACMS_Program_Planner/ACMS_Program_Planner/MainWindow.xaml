@@ -30,7 +30,11 @@
                         IsPaneOpen="True">
             <NavigationView.Resources>
                 <Style TargetType="NavigationViewItem">
-                    <Setter Property="Margin" Value="0,5,0,5" />
+                    <!--Setter Property="Margin" Value="0,5,0,5" /-->
+                    <Setter Property="Padding" Value="10,5,10,5" />
+                </Style>
+                <Style TargetType="TextBlock">
+                    <Setter Property="Margin" Value="0,2,0,2" />
                 </Style>
                 <SolidColorBrush x:Key="NavigationViewContentBackground" Color="Transparent" />
             </NavigationView.Resources>
@@ -38,32 +42,32 @@
                 <NavigationViewItem Tag="StepsPage">
                     <NavigationViewItem.Content>
                         <StackPanel HorizontalAlignment="Center">
-                            <FontIcon Glyph="&#xE8D2;" FontSize="24" />
-                            <TextBlock Text="Steps" HorizontalAlignment="Center" />
+                            <FontIcon Glyph="&#xE8FD;" FontSize="24" />
+                            <TextBlock Text="Steps" HorizontalAlignment="Center" Margin="0,2,0,2" />
                         </StackPanel>
                     </NavigationViewItem.Content>
                 </NavigationViewItem>
                 <NavigationViewItem Tag="ProgramsPage">
                     <NavigationViewItem.Content>
                         <StackPanel HorizontalAlignment="Center">
-                            <FontIcon Glyph="&#xE8D2;" FontSize="24" />
-                            <TextBlock Text="Programs" HorizontalAlignment="Center" />
+                            <FontIcon Glyph="&#xED56;" FontSize="24" />
+                            <TextBlock Text="Programs" HorizontalAlignment="Center" Margin="0,2,0,2" />
                         </StackPanel>
                     </NavigationViewItem.Content>
                 </NavigationViewItem>
                 <NavigationViewItem Tag="ServicePlanPage">
                     <NavigationViewItem.Content>
                         <StackPanel HorizontalAlignment="Center">
-                            <FontIcon Glyph="&#xE8D2;" FontSize="24" />
-                            <TextBlock Text="Service Plans" HorizontalAlignment="Center" />
+                            <FontIcon Glyph="&#xE709;" FontSize="24" />
+                            <TextBlock Text="Service Plans" HorizontalAlignment="Center" Margin="0,2,0,2" />
                         </StackPanel>
                     </NavigationViewItem.Content>
                 </NavigationViewItem>
                 <NavigationViewItem Tag="RFIDPage">
                     <NavigationViewItem.Content>
                         <StackPanel HorizontalAlignment="Center">
-                            <FontIcon Glyph="&#xE8D2;" FontSize="24" />
-                            <TextBlock Text="RFID" HorizontalAlignment="Center" />
+                            <FontIcon Glyph="&#xE957;" FontSize="24" />
+                            <TextBlock Text="RFID" HorizontalAlignment="Center" Margin="0,2,0,2" />
                         </StackPanel>
                     </NavigationViewItem.Content>
                 </NavigationViewItem>

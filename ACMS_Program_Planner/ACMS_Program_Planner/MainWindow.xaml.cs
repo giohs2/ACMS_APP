@@ -20,6 +20,7 @@ using WinRT.Interop;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Composition.SystemBackdrops;
 using ACMS_Program_Planner.Models;
+using Windows.Graphics.Display;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -42,6 +43,8 @@ namespace ACMS_Program_Planner
             TrySetSystemBackdrop();
 
             SetupTitleBar();
+
+            AdjustNavigationViewWidth();
 
             // Navigate to default page if needed
             if (ContentFrame.Content == null)
@@ -159,6 +162,15 @@ namespace ACMS_Program_Planner
                     case ElementTheme.Default: m_configurationSource.Theme = SystemBackdropTheme.Default; break;
                 }
             }
+        }
+
+        private void AdjustNavigationViewWidth()
+        {
+            float scalingRatio = App.windowScaling(this);
+
+            // Adjust the NavigationView pane lengths dynamically
+            MainNavigationView.OpenPaneLength = 114 * scalingRatio;
+            MainNavigationView.CompactPaneLength = 114 * scalingRatio;
         }
     }
 
