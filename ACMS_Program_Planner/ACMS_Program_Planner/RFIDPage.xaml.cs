@@ -34,7 +34,8 @@ public sealed partial class RFIDPage : Page
 
     public SettingsModel ViewModel { get => SettingsModel.Instance; }
 
-    public ObservableCollection<ServicePlanItem> ServicePlans => DataService.Instance.ServicePlans;
+    public ObservableCollection<ServicePlanItem> ServicePlans => new ObservableCollection<ServicePlanItem>(DataService.Instance.ServicePlans.Where(p => !p.IsEditable));
+
     public ObservableCollection<RFIDUnit> RFIDUnits = new ObservableCollection<RFIDUnit>();
 
     public RFIDPage()

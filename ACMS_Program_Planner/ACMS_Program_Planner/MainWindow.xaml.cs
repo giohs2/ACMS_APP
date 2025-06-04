@@ -44,8 +44,6 @@ namespace ACMS_Program_Planner
 
             SetupTitleBar();
 
-            AdjustNavigationViewWidth();
-
             // Navigate to default page if needed
             if (ContentFrame.Content == null)
             {
@@ -162,15 +160,6 @@ namespace ACMS_Program_Planner
                     case ElementTheme.Default: m_configurationSource.Theme = SystemBackdropTheme.Default; break;
                 }
             }
-        }
-
-        private void AdjustNavigationViewWidth()
-        {
-            float scalingRatio = App.windowScaling(this);
-
-            // Adjust the NavigationView pane lengths dynamically
-            MainNavigationView.OpenPaneLength = 114 * scalingRatio;
-            MainNavigationView.CompactPaneLength = 114 * scalingRatio;
         }
     }
 

@@ -25,13 +25,13 @@
                         IsSettingsVisible="True"
                         IsBackButtonVisible="Collapsed"
                         IsPaneToggleButtonVisible="False"
-                        OpenPaneLength="120"
-                        CompactPaneLength="120"
+                        OpenPaneLength="140"
+                        CompactPaneLength="140"
                         IsPaneOpen="True">
             <NavigationView.Resources>
                 <Style TargetType="NavigationViewItem">
                     <!--Setter Property="Margin" Value="0,5,0,5" /-->
-                    <Setter Property="Padding" Value="10,5,10,5" />
+                    <Setter Property="Padding" Value="0,5,0,5" />
                 </Style>
                 <Style TargetType="TextBlock">
                     <Setter Property="Margin" Value="0,2,0,2" />

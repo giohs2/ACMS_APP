@@ -3,6 +3,8 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using ACMS_Program_Planner.Models;
@@ -167,6 +169,15 @@ namespace ACMS_Program_Planner.Services
             IncrementNextProgramId();
             Programs.Add(defaultProgram);
 
+            var defaultProgram2 = new ProgramItem
+            {
+                Id = NextProgramId,
+                Name = "Beef Stew",
+                StepIds = new ObservableCollection<int>() { 1, 2, 3 }
+            };
+            IncrementNextProgramId();
+            Programs.Add(defaultProgram2);
+
             // Add default service plan
             var newPlan = new ServicePlanItem
             {
@@ -177,17 +188,20 @@ namespace ACMS_Program_Planner.Services
             IncrementNextServicePlanId();
 
             ObservableCollection<UnitProgram> unitPrograms = new ObservableCollection<UnitProgram>();
-            foreach (var unit in Flights[0].Units)
+            unitPrograms.Add(new UnitProgram
             {
-                unitPrograms.Add(new UnitProgram
-                {
-                    Unit = unit,
-                    CycleId = 1,
-                    Name = "Cycle 1: " + unit.UnitName,
-                    ProgramId = 1,
-                    //StartOffset = 0.0f
-                });
-            }
+                Unit = Flights[0].Units[0],
+                CycleId = 1,
+                Name = "Cycle 1: " + Flights[0].Units[0].UnitName,
+                ProgramId = 1,
+            });
+            unitPrograms.Add(new UnitProgram
+            {
+                Unit = Flights[0].Units[1],
+                CycleId = 1,
+                Name = "Cycle 1: " + Flights[0].Units[1].UnitName,
+                ProgramId = 2,
+            });
 
             var newCycle = new Cycle
             {
@@ -199,27 +213,6 @@ namespace ACMS_Program_Planner.Services
 
             newPlan.Cycles.Add(newCycle);
 
-            ObservableCollection<UnitProgram> unitPrograms2 = new ObservableCollection<UnitProgram>();
-            foreach (var unit in Flights[0].Units)
-            {
-                unitPrograms2.Add(new UnitProgram
-                {
-                    Unit = unit,
-                    CycleId = 2,
-                    Name = "Cycle 2: " + unit.UnitName,
-                    ProgramId = 1,
-                    //StartOffset = 0.0f
-                });
-            }
-
-            var newCycle2 = new Cycle
-            {
-                CycleId = 2,
-                Name = "Cycle 2",
-                UnitPrograms = unitPrograms2
-            };
-
-            newPlan.Cycles.Add(newCycle2);
             ServicePlans.Add(newPlan);
 
             // Save the default data
@@ -358,8 +351,19 @@ namespace ACMS_Program_Planner.Services
         {
             if (File.Exists(FilePath))
             {
-                var json = File.ReadAllText(FilePath);
-                var data = JsonSerializer.Deserialize<DataModel>(json);
+                var wrapperJson = File.ReadAllText(FilePath);
+                var fileWithCrc = JsonSerializer.Deserialize<DataFileWithCrc>(wrapperJson);
+
+                if (fileWithCrc?.DataJson == null)
+                {
+                    return (new ObservableCollection<StepItem>(), new ObservableCollection<ProgramItem>(), new ObservableCollection<ServicePlanItem>(), 1, 1, 1);
+                }
+
+                uint actualCrc = Crc32Helper.Compute(System.Text.Encoding.UTF8.GetBytes(fileWithCrc.DataJson));
+                if (actualCrc != fileWithCrc.Crc32)
+                    throw new Exception("Data file CRC check failed. The file may have been tampered with.");
+
+                var data = JsonSerializer.Deserialize<DataModel>(fileWithCrc.DataJson);
                 return (data?.Steps ?? new ObservableCollection<StepItem>(), 
                         data?.Programs ?? new ObservableCollection<ProgramItem>(),
                         data?.ServicePlans ?? new ObservableCollection<ServicePlanItem>(),
@@ -375,7 +379,7 @@ namespace ACMS_Program_Planner.Services
             {
                 Date = DateTime.Now,
                 User = System.Environment.MachineName,
-                Version = SettingsModel.Instance.AppVersion 
+                Version = SettingsModel.Instance.AppVersion
             };
 
             var data = new DataModel
@@ -389,8 +393,17 @@ namespace ACMS_Program_Planner.Services
                 NextServicePlanId = NextServicePlanId
             };
 
-            var json = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(FilePath, json);
+            var dataJson = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = false });
+            uint crc = Crc32Helper.Compute(System.Text.Encoding.UTF8.GetBytes(dataJson));
+
+            var fileWithCrc = new DataFileWithCrc
+            {
+                DataJson = dataJson,
+                Crc32 = crc
+            };
+
+            var wrapperJson = JsonSerializer.Serialize(fileWithCrc, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(FilePath, wrapperJson);
         }
 
         public string GetDataInJson()
@@ -413,7 +426,16 @@ namespace ACMS_Program_Planner.Services
                 NextServicePlanId = NextServicePlanId
             };
 
-            return JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });
+            var dataJson = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = false });
+            uint crc = Crc32Helper.Compute(System.Text.Encoding.UTF8.GetBytes(dataJson));
+
+            var fileWithCrc = new DataFileWithCrc
+            {
+                DataJson = dataJson,
+                Crc32 = crc
+            };
+
+            return JsonSerializer.Serialize(fileWithCrc, new JsonSerializerOptions { WriteIndented = true });
         }
 
         public void IncrementNextStepId()
@@ -451,5 +473,30 @@ namespace ACMS_Program_Planner.Services
         public int NextStepId { get; set; }
         public int NextProgramId { get; set; }
         public int NextServicePlanId { get; set; }
+    }
+
+    public class DataFileWithCrc
+    {
+        public string? DataJson { get; set; }
+        public uint Crc32 { get; set; }
+    }
+
+    public static class Crc32Helper
+    {
+        private static readonly uint[] Table = Enumerable.Range(0, 256).Select(i =>
+        {
+            uint crc = (uint)i;
+            for (int j = 0; j < 8; j++)
+                crc = (crc & 1) != 0 ? (0xEDB88320 ^ (crc >> 1)) : (crc >> 1);
+            return crc;
+        }).ToArray();
+
+        public static uint Compute(byte[] bytes)
+        {
+            uint crc = 0xFFFFFFFF;
+            foreach (var b in bytes)
+                crc = Table[(crc ^ b) & 0xFF] ^ (crc >> 8);
+            return ~crc;
+        }
     }
 }

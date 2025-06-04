@@ -85,9 +85,12 @@
                     <SelectorBarItem x:Name="SelectorBarItem3" Text="Galley 3" />
                 </SelectorBar-->
                 <StackPanel Grid.Row="1" x:Name="FormPanel" Visibility="Collapsed" Margin="16, 32, 16, 24">
-                    <TextBlock x:Name="PlanId" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,24" />
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                        <TextBlock x:Name="PlanId" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,24" VerticalAlignment="Center" HorizontalTextAlignment="Left" />
+                        <Button x:Name="LockButton" Content="Lock Plan" Click="LockButton_Click" Margin="16,0,0,24" VerticalAlignment="Center" HorizontalContentAlignment="Right" IsEnabled="{Binding IsEditable, Mode=OneWay}"/>
+                    </StackPanel>
                     <TextBlock Text="Name" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="0,0,0,12" />
-                    <TextBox x:Name="NameTextBox" Margin="0,0,0,16" Width="250" HorizontalAlignment="Left" HorizontalContentAlignment="Left" Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox x:Name="NameTextBox" Margin="0,0,0,16" Width="250" HorizontalAlignment="Left" HorizontalContentAlignment="Left" Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsEditable, Mode=OneWay}" />
                     <TextBlock Text="Flight" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="0,0,0,12" />
                     <ComboBox x:Name="FlightsComboBox"
                               DisplayMemberPath="CombinedFlightName"
@@ -96,7 +99,7 @@
                               Margin="0,0,0,16"
                               Width="250"
                               HorizontalAlignment="Left"
-                              HorizontalContentAlignment="Left" SelectionChanged="FlightsComboBox_SelectionChanged" />
+                              HorizontalContentAlignment="Left" SelectionChanged="FlightsComboBox_SelectionChanged" IsEnabled="{Binding IsEditable, Mode=OneWay}" />
                     <!--TextBlock Text="Units and Programs" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="0,0,0,12" />
                     <StackPanel Orientation="Horizontal">
                         <ComboBox x:Name="UnitsComboBox"
@@ -117,9 +120,11 @@
                                     HorizontalContentAlignment="Left" SelectionChanged="ProgramsComboBox_SelectionChanged" />
                     </StackPanel-->
 
-                    <TextBlock Text="Cycles" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="0,0,0,12" />
-                    <Button x:Name="AddCycleButton" Content="Add Cycle" Click="Add_CycleButton_Click" />
-                    <Grid Margin="0, 10, 10, 10">
+                    <StackPanel Orientation="Horizontal" Margin="0,12,0,5">
+                        <TextBlock Text="Cycles" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,12,0" />
+                        <Button x:Name="AddCycleButton" Content="Add Cycle" Click="Add_CycleButton_Click" IsEnabled="{Binding IsEditable, Mode=OneWay}" />
+                    </StackPanel>
+                    <Grid Margin="0, 0, 10, 10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
@@ -127,18 +132,18 @@
                         <TreeView Grid.Column="0" x:Name="CyclesTreeView" SelectionChanged="CyclesTreeView_SelectionChanged" SelectionMode="Single"
                                   ItemsSource="{x:Bind ServiceSteps, Mode=OneWay}" ItemTemplateSelector="{StaticResource CycleItemTemplateSelector}"
                                   BorderBrush="{ThemeResource SystemControlForegroundBaseMediumLowBrush}" BorderThickness="1" 
-                                  MinHeight="300" MaxHeight="300" MinWidth="200" Margin="10">
+                                  MinHeight="300" MaxHeight="300" MinWidth="200" Margin="0,10,10,10">
                         </TreeView>
-                        <StackPanel Grid.Column="1" x:Name="ItemDetails" Visibility="Collapsed" Margin="10">
+                        <StackPanel Grid.Column="1" x:Name="ItemDetails" Visibility="Collapsed" Margin="0,10,10,10">
                             <TextBlock x:Name="ItemTitle" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0, 0, 0, 12" />
-                            <TimePicker x:Name="CycleSchedule" Header="Service Cycle Schedule" Margin="0, 0, 0, 12" SelectedTimeChanged="CycleSchedule_SelectedTimeChanged"/>
+                            <TimePicker x:Name="CycleSchedule" Header="Service Cycle Schedule" Margin="0, 0, 0, 12" SelectedTimeChanged="CycleSchedule_SelectedTimeChanged" IsEnabled="{Binding IsEditable, Mode=OneWay}" />
                             <TextBlock x:Name="ProgramsComboBoxTitle" Margin="0, 0, 0, 12" />
                             <ComboBox x:Name="ProgramsComboBox" Margin="0, 0, 0, 12"
                                 DisplayMemberPath="Name"
                                 SelectedValuePath="Id"
                                 SelectedItem="{Binding Program, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                 HorizontalAlignment="Left"
-                                HorizontalContentAlignment="Left" SelectionChanged="ProgramsComboBox_SelectionChanged" />
+                                HorizontalContentAlignment="Left" SelectionChanged="ProgramsComboBox_SelectionChanged" IsEnabled="{Binding IsEditable, Mode=OneWay}" />
                             <!--TextBlock x:Name="StartOffsetNumberBoxTitle" Margin="0, 0, 0, 12" />
                             <NumberBox x:Name="StartOffsetNumberBox" MaxWidth="120" ValueChanged="StartOffsetNumberBox_ValueChanged"
                                 Minimum="0" SpinButtonPlacementMode="Compact" HorizontalAlignment="Left" /-->

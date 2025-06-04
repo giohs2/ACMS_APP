@@ -78,6 +78,20 @@ namespace ACMS_Program_Planner.Models
             }
         }
 
+        private bool _isEditable = true;
+        public bool IsEditable
+        {
+            get => _isEditable;
+            set
+            {
+                if (_isEditable != value)
+                {
+                    _isEditable = value;
+                    OnPropertyChanged(nameof(IsEditable));
+                }
+            }
+        }
+       
         public event PropertyChangedEventHandler? PropertyChanged;
 
         protected void OnPropertyChanged(string propertyName)

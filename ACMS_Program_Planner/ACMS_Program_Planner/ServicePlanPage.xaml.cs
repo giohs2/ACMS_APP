@@ -75,6 +75,7 @@ namespace ACMS_Program_Planner
             FormPanel.Visibility = Visibility.Visible;
             PlanId.Text = "Service Plan Id: " + newPlan.Id.ToString();
             DataContext = newPlan;
+            LockButton.Visibility = Visibility.Visible;
         }
 
         private void PlansListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -84,6 +85,16 @@ namespace ACMS_Program_Planner
                 selectedServicePlan = selectedItem;
                 FormPanel.Visibility = Visibility.Visible;
                 PlanId.Text = "Service Plan Id: " + selectedServicePlan.Id.ToString();
+                if (!selectedServicePlan.IsEditable)
+                {
+                    PlanId.Text += " (Locked)";
+                    LockButton.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    LockButton.Visibility = Visibility.Visible;
+                }
+
                 DataContext = selectedServicePlan;
                 ServiceSteps = selectedServicePlan.Cycles;
                 FlightsComboBox.ItemsSource = DataService.Instance.Flights;
@@ -230,6 +241,29 @@ namespace ACMS_Program_Planner
             if (cycle != null)
             {
                 cycle.Delay = args.NewTime;
+            }
+        }
+
+        private async void LockButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Show confirmation to user
+            var dialog = new ContentDialog
+            {
+                Title = "Lock Plan",
+                Content = "By locking this Service Plan, you will not be able to edit it anymore. The plan is sent to the flight's catering system and can be programmed to the oven racks.\n\nAre you sure you want to continue?",
+                PrimaryButtonText = "Yes",
+                CloseButtonText = "No",
+                XamlRoot = this.XamlRoot
+            };
+
+            ContentDialogResult result = await dialog.ShowAsync();
+
+            // Check if the user clicked "Yes" (PrimaryButton)
+            if (result == ContentDialogResult.Primary && selectedServicePlan != null)
+            {
+                selectedServicePlan.IsEditable = false;
+                PlanId.Text += " (Locked)";
+                LockButton.Visibility = Visibility.Collapsed;
             }
         }
 

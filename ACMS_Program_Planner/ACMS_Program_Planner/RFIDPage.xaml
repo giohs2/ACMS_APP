@@ -20,7 +20,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Margin="20,20,20,0">
-            <TextBlock Text="RFID -- For Development only!" Style="{StaticResource TitleTextBlockStyle}" Margin="10,10,10,10" VerticalAlignment="Center" />
+            <TextBlock Text="RFID Tag Programmer" Style="{StaticResource TitleTextBlockStyle}" Margin="10,10,10,10" VerticalAlignment="Center" />
         </StackPanel>
         <StackPanel Grid.Row="1" Spacing="20" Margin="20,20,20,0">
             <!-- RFID Reader/Writer settings -->
@@ -64,7 +64,7 @@
             </Grid.ColumnDefinitions>
 
             <TextBox x:Name="DataTextBox" Grid.Column="0" Margin="0,0,10,0" TextWrapping="Wrap" IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Auto"
-                    ScrollViewer.HorizontalScrollBarVisibility="Auto" MinHeight="100" MaxHeight="100"/>
+                    ScrollViewer.HorizontalScrollBarVisibility="Auto" MinHeight="100" MaxHeight="100" Visibility="Collapsed" />
 
         </Grid>
 
@@ -139,7 +139,7 @@
                                     <TextBlock Grid.Column="0" Text="{x:Bind CycleUnit}" VerticalAlignment="Center" />
                                     <TextBlock Grid.Column="1" Text="{x:Bind ProgramName}" VerticalAlignment="Center" />
                                     <Button Grid.Column="2" Content="Program Tag" Click="Program_Button_Click" VerticalAlignment="Center" />
-                                    <CheckBox Grid.Column="3" IsChecked="{x:Bind IsDone, Mode=TwoWay}" VerticalAlignment="Center" />
+                                    <CheckBox Grid.Column="3" IsChecked="{x:Bind IsDone, Mode=TwoWay}" VerticalAlignment="Center" IsEnabled="False" />
                                 </Grid>
                             </DataTemplate>
                         </ListView.ItemTemplate>
