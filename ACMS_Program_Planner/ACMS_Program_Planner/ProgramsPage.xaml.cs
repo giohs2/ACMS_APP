@@ -157,8 +157,13 @@ namespace ACMS_Program_Planner
                     {
                         selectedProgram.StepIds = new ObservableCollection<int>();
                     }
-                    selectedProgram.StepIds.Add(stepId);
-                    UpdateSelectedStepsList();
+                    if (selectedProgram.StepIds.Count <= 2)
+                    {
+                        selectedProgram.StepIds.Add(stepId);
+                        UpdateSelectedStepsList();
+                    }
+                    else
+                        e.Handled = true; // Prevent drop if 3 steps are already selected
                 }
             }
         }
