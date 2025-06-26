@@ -19,7 +19,7 @@
 	<WindowsTargetPlatformMinVersion>10.0.22621.0</WindowsTargetPlatformMinVersion>
 
 	<!-- Add version properties here -->
-	<Version>1.0.15.0</Version>
+	<Version>1.0.16.0</Version>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="ProgramsPage.xaml" />

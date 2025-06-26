@@ -393,7 +393,9 @@ namespace ACMS_Program_Planner.Services
                 NextServicePlanId = NextServicePlanId
             };
 
-            var dataJson = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = false });
+            var dataJson = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true,
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            });
             uint crc = Crc32Helper.Compute(System.Text.Encoding.UTF8.GetBytes(dataJson));
 
             var fileWithCrc = new DataFileWithCrc
@@ -402,7 +404,9 @@ namespace ACMS_Program_Planner.Services
                 Crc32 = crc
             };
 
-            var wrapperJson = JsonSerializer.Serialize(fileWithCrc, new JsonSerializerOptions { WriteIndented = true });
+            var wrapperJson = JsonSerializer.Serialize(fileWithCrc, new JsonSerializerOptions { WriteIndented = true,
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            });
             File.WriteAllText(FilePath, wrapperJson);
         }
 
@@ -426,7 +430,9 @@ namespace ACMS_Program_Planner.Services
                 NextServicePlanId = NextServicePlanId
             };
 
-            var dataJson = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = false });
+            var dataJson = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true,
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            });
             uint crc = Crc32Helper.Compute(System.Text.Encoding.UTF8.GetBytes(dataJson));
 
             var fileWithCrc = new DataFileWithCrc
@@ -435,7 +441,9 @@ namespace ACMS_Program_Planner.Services
                 Crc32 = crc
             };
 
-            return JsonSerializer.Serialize(fileWithCrc, new JsonSerializerOptions { WriteIndented = true });
+            return JsonSerializer.Serialize(fileWithCrc, new JsonSerializerOptions { WriteIndented = true,
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            });
         }
 
         public void IncrementNextStepId()
@@ -475,8 +483,31 @@ namespace ACMS_Program_Planner.Services
         public int NextServicePlanId { get; set; }
     }
 
+    public class PreformattedJsonConverter : JsonConverter<string>
+    {
+        public override string Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            if (reader.TokenType == JsonTokenType.String)
+            {
+                return reader.GetString() ?? string.Empty;
+            }
+            else
+            {
+                // Read the raw JSON as a string
+                using var document = JsonDocument.ParseValue(ref reader);
+                return document.RootElement.GetRawText();
+            }
+        }
+
+        public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
+        {
+            writer.WriteRawValue(value);
+        }
+    }
+
     public class DataFileWithCrc
     {
+        [JsonConverter(typeof(PreformattedJsonConverter))]
         public string? DataJson { get; set; }
         public uint Crc32 { get; set; }
     }
