@@ -87,7 +87,7 @@
                 <StackPanel Grid.Row="1" x:Name="FormPanel" Visibility="Collapsed" Margin="16, 32, 16, 24">
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
                         <TextBlock x:Name="PlanId" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,24" VerticalAlignment="Center" HorizontalTextAlignment="Left" />
-                        <Button x:Name="LockButton" Content="Lock Plan" Click="LockButton_Click" Margin="16,0,0,24" VerticalAlignment="Center" HorizontalContentAlignment="Right" IsEnabled="{Binding IsEditable, Mode=OneWay}"/>
+                        <Button x:Name="LockButton" Content="Lock Plan" Click="LockButton_Click" Margin="16,0,0,24" VerticalAlignment="Center" HorizontalContentAlignment="Right" IsEnabled="{Binding IsLockButtonEnabled, Mode=OneWay}"/>
                     </StackPanel>
                     <TextBlock Text="Name" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="0,0,0,12" />
                     <TextBox x:Name="NameTextBox" Margin="0,0,0,16" Width="250" HorizontalAlignment="Left" HorizontalContentAlignment="Left" Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsEditable, Mode=OneWay}" />
@@ -141,7 +141,6 @@
                             <ComboBox x:Name="ProgramsComboBox" Margin="0, 0, 0, 12"
                                 DisplayMemberPath="Name"
                                 SelectedValuePath="Id"
-                                SelectedItem="{Binding Program, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                 HorizontalAlignment="Left"
                                 HorizontalContentAlignment="Left" SelectionChanged="ProgramsComboBox_SelectionChanged" IsEnabled="{Binding IsEditable, Mode=OneWay}" />
                             <!--TextBlock x:Name="StartOffsetNumberBoxTitle" Margin="0, 0, 0, 12" />

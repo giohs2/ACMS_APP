@@ -75,6 +75,7 @@ namespace ACMS_Program_Planner
             FormPanel.Visibility = Visibility.Visible;
             PlanId.Text = "Service Plan Id: " + newPlan.Id.ToString();
             DataContext = newPlan;
+            FormPanel.DataContext = newPlan;
             LockButton.Visibility = Visibility.Visible;
         }
 
@@ -84,6 +85,7 @@ namespace ACMS_Program_Planner
             {
                 selectedServicePlan = selectedItem;
                 FormPanel.Visibility = Visibility.Visible;
+                FormPanel.DataContext = selectedServicePlan;
                 PlanId.Text = "Service Plan Id: " + selectedServicePlan.Id.ToString();
                 if (!selectedServicePlan.IsEditable)
                 {
@@ -102,6 +104,7 @@ namespace ACMS_Program_Planner
                 if (selectedFlight != null)
                 {
                     FlightsComboBox.SelectedItem = selectedFlight;
+                    AddCycleButton.IsEnabled = selectedServicePlan.IsLockButtonEnabled;
                 }
                 else
                 {
@@ -147,7 +150,7 @@ namespace ACMS_Program_Planner
                 if (selectedServicePlan != null)
                 {
                     selectedServicePlan.Flight = selectedItem;
-                    AddCycleButton.IsEnabled = true;
+                    AddCycleButton.IsEnabled = selectedServicePlan.IsEditable;
                 }
             }
             else
@@ -264,6 +267,7 @@ namespace ACMS_Program_Planner
                 selectedServicePlan.IsEditable = false;
                 PlanId.Text += " (Locked)";
                 LockButton.Visibility = Visibility.Collapsed;
+                AddCycleButton.IsEnabled = false;
             }
         }
 

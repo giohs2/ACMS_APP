@@ -16,6 +16,14 @@ namespace ACMS_Program_Planner.Models
 
         private ObservableCollection<Cycle> cycles = new ObservableCollection<Cycle>();
 
+        public ServicePlanItem()
+        {
+            cycles.CollectionChanged += (s, args) => { 
+                OnPropertyChanged(nameof(Cycles));
+                OnPropertyChanged(nameof(IsLockButtonEnabled));
+            };
+        }
+
         public Dictionary<int, string> MealtimeType = new Dictionary<int, string>
         {
             { 0, "Breakfast" },
@@ -45,6 +53,7 @@ namespace ACMS_Program_Planner.Models
                 {
                     name = value;
                     OnPropertyChanged(nameof(Name));
+                    OnPropertyChanged(nameof(IsLockButtonEnabled));
                 }
             }
         }
@@ -59,6 +68,7 @@ namespace ACMS_Program_Planner.Models
                     flight = value;
                     OnPropertyChanged(nameof(Flight));
                     OnPropertyChanged(nameof(FlightName));
+                    OnPropertyChanged(nameof(IsLockButtonEnabled));
                 }
             }
         }
@@ -74,6 +84,7 @@ namespace ACMS_Program_Planner.Models
                 {
                     cycles = value;
                     OnPropertyChanged(nameof(Cycles));
+                    OnPropertyChanged(nameof(IsLockButtonEnabled));
                 }
             }
         }
@@ -91,7 +102,25 @@ namespace ACMS_Program_Planner.Models
                 }
             }
         }
-       
+
+        private bool IsServicePlanValid()
+        {
+            if (!IsEditable ||
+                string.IsNullOrWhiteSpace(Name) ||
+                Flight == null ||
+                Cycles.Count == 0)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public bool IsLockButtonEnabled
+        {
+            get => IsServicePlanValid();
+        }
+
         public event PropertyChangedEventHandler? PropertyChanged;
 
         protected void OnPropertyChanged(string propertyName)
