@@ -34,7 +34,7 @@ pipelines:
             - $arg1 = "-p:Configuration=Release"
             - $arg2 = "-p:GenerateAppxPackageOnBuild=true"
             - '& "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\amd64\msbuild.exe" $arg1 $arg2'
-            - $MsixFolderName = (Get-Item "ACMS_App\ACMS_Program_Planner\bin\x64\Release\net9.0-windows10.0.22621.0\win-x64\AppPackages\ACMS_Program_Planner_*").FullName
+            - $MsixFolderName = (Get-Item "ACMS_Program_Planner\bin\x64\Release\net9.0-windows10.0.22621.0\win-x64\AppPackages\ACMS_Program_Planner_*").FullName
             - $MsixFullPath = (Get-Item "$MsixFolderName\ACMS_Program_Planner_*.msix").FullName
             - echo $MsixFullPath
             - '& "C:\Program Files\DigiCert\DigiCert Keylocker Tools\smctl.exe" sign --keypair-alias=key_1292405931 -d=SHA256 --verbose --config-file "C:\Program Files\DigiCert\DigiCert Keylocker Tools\pkcs11properties.cfg" --input "$MsixFullPath"'
