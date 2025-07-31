@@ -260,8 +260,6 @@ public sealed partial class RFIDPage : Page
                                 (programData.NUMBER_OF_PROGRAMS & 0x3F)              // 6 bits in positions 0-5
                                 );
 
-        hexData[index++] = (byte)((combinedValue >> 8) & 0xFF);
-        hexData[index++] = (byte)(combinedValue & 0xFF);
         hexData[index++] = programData.PROGRAM_NUMBER;
         hexData[index++] = programData.PROGRAM_NUMBER_OF_STEPS;
         for (int i = 0; i < programData.PROGRAM_NAME.Length; i++)
