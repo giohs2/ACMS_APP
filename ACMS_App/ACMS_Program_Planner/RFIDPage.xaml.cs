@@ -250,7 +250,9 @@ public sealed partial class RFIDPage : Page
         // 2 bytes (header) + 1 byte (program number) + 1 byte (step count) + 
         // 20 bytes (program name) + (steps * 29 bytes per step)
         int bytesPerStep = 1 + 20 + 2 + 1 + 2 + 1 + 1 + 1; // 29 bytes per step
-        int dataSize = 2 + 1 + 1 + 20 + (programData.STEPS.Length * bytesPerStep);
+        int dataSize = 1 + 1 + 20 + (programData.STEPS.Length * bytesPerStep);
+        dataSize += 4; //CRC
+
         byte[] hexData = new byte[dataSize];
         int index = 0;
 
@@ -282,6 +284,30 @@ public sealed partial class RFIDPage : Page
             hexData[index++] = programData.STEPS[i].STEP_TERMINATION1;
             hexData[index++] = programData.STEPS[i].STEP_TERMINATION2;
         }
+
+        UInt16 bit;
+        UInt32 data, crc32;
+
+        crc32 = 0xFFFFFFFF;
+        for (int idx = 0; idx < index; idx++)
+        {
+            data = hexData[index];
+            for (bit = 0; bit < 8; bit++)
+            {
+                UInt32 tmp = (crc32 ^ data) & (UInt32)0x00000001;
+                if (tmp == 1)
+                    crc32 = (crc32 >> 1) ^ 0xEDB88320;
+                else
+                    crc32 = (crc32 >> 1) ^ 0;
+                data >>= 1;
+            }
+        }
+        crc32 ^= 0xFFFFFFFF;
+
+        hexData[index++] = (byte)(crc32 >> 24);
+        hexData[index++] = (byte)(crc32 >> 16);
+        hexData[index++] = (byte)(crc32 >> 8);
+        hexData[index++] = (byte)(crc32 & 0xFF);
 
         // return hexData as string
         string hexString = BitConverter.ToString(hexData).Replace("-", "");
