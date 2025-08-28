@@ -251,12 +251,12 @@ public sealed partial class RFIDPage : Page
         // 20 bytes (program name) + (steps * 29 bytes per step)
         int bytesPerStep = 1 + 20 + 2 + 1 + 2 + 1 + 1 + 1; // 29 bytes per step
         int dataSize = 1 + 1 + 20 + (programData.STEPS.Length * bytesPerStep);
-        dataSize += 4; //CRC
+        dataSize += 2; // 4 - Byte CRC
 
-        byte[] hexData = new byte[dataSize];
+        byte[] hexData = new byte[112];
         int index = 0;
 
-        ushort combinedValue =  (ushort)(
+        ushort combinedValue = (ushort)(
                                 ((programData.PROGRAM_DEVICE_CLASS & 0x1F) << 11) |  // 5 bits, shifted to positions 11-15
                                 ((programData.PROGRAM_DEVICE_GROUP & 0x1F) << 6) |   // 5 bits, shifted to positions 6-10
                                 (programData.NUMBER_OF_PROGRAMS & 0x3F)              // 6 bits in positions 0-5
@@ -285,13 +285,14 @@ public sealed partial class RFIDPage : Page
             hexData[index++] = programData.STEPS[i].STEP_TERMINATION2;
         }
 
+        // 4 Byte CRC but for that we would have to change unit firmware
         UInt16 bit;
         UInt32 data, crc32;
 
         crc32 = 0xFFFFFFFF;
-        for (int idx = 0; idx < index; idx++)
+        for (int idx = 0; idx < 108; idx++)
         {
-            data = hexData[index];
+            data = hexData[idx];
             for (bit = 0; bit < 8; bit++)
             {
                 UInt32 tmp = (crc32 ^ data) & (UInt32)0x00000001;
@@ -299,15 +300,17 @@ public sealed partial class RFIDPage : Page
                     crc32 = (crc32 >> 1) ^ 0xEDB88320;
                 else
                     crc32 = (crc32 >> 1) ^ 0;
-                data >>= 1;
+             data >>= 1;
             }
         }
+        
         crc32 ^= 0xFFFFFFFF;
 
-        hexData[index++] = (byte)(crc32 >> 24);
-        hexData[index++] = (byte)(crc32 >> 16);
-        hexData[index++] = (byte)(crc32 >> 8);
-        hexData[index++] = (byte)(crc32 & 0xFF);
+        hexData[108] = (byte)(crc32 >> 24);
+        hexData[109] = (byte)(crc32 >> 16);
+        hexData[110] = (byte)(crc32 >> 8);
+        hexData[111] = (byte)(crc32 & 0xFF);
+
 
         // return hexData as string
         string hexString = BitConverter.ToString(hexData).Replace("-", "");
