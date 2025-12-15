@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net9.0-windows10.0.22621.0</TargetFramework>
@@ -27,6 +27,7 @@
     <None Remove="RFIDPage.xaml" />
     <None Remove="SettingsPage.xaml" />
     <None Remove="StepsPage.xaml" />
+    <None Remove="QRPage.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -55,9 +56,15 @@
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3351.48" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.4188" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250606001" />
+    <PackageReference Include="QRCoder" Version="1.7.0" />
     <PackageReference Include="ScottPlot.WinUI" Version="5.0.55" />
     <PackageReference Include="System.IO.Ports" Version="9.0.6" />
     <PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="QRPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="RFIDPage.xaml">
@@ -104,8 +111,8 @@
 
   <!-- Publish Properties -->
   <PropertyGroup>
-    <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
-    <AppxPackageSigningEnabled>False</AppxPackageSigningEnabled>
+    <GenerateAppInstallerFile>True</GenerateAppInstallerFile>
+    <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
     <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
@@ -114,5 +121,8 @@
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
     <SupportedOSPlatformVersion>10.0.22621.0</SupportedOSPlatformVersion>
 	<AppxBundlePlatforms>x64</AppxBundlePlatforms>
+	<PackageCertificateThumbprint>30537B051175DEC5D30E68BEBE3632C04BBD615B</PackageCertificateThumbprint>
+	<AppxPackageDir>C:\Users\GMateus\Ipeco Holdings Ltd\Development Tools Library - Dokumente\Ipeco-Demo-Tools\</AppxPackageDir>
+	<AppInstallerUri>\\pdm15\Software\SDrive\EMIRATES_DEMO</AppInstallerUri>
   </PropertyGroup>
 </Project>

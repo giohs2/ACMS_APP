@@ -71,6 +71,14 @@
                         </StackPanel>
                     </NavigationViewItem.Content>
                 </NavigationViewItem>
+                <NavigationViewItem Tag="QRPage">
+                    <NavigationViewItem.Content>
+                        <StackPanel HorizontalAlignment="Center">
+                            <FontIcon Glyph="&#xED14;" FontSize="24" />
+                            <TextBlock Text="QR Code" HorizontalAlignment="Center" Margin="0,2,0,2" />
+                        </StackPanel>
+                    </NavigationViewItem.Content>
+                </NavigationViewItem>
             </NavigationView.MenuItems>
 
             <Grid>

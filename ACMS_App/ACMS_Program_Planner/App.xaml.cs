@@ -61,6 +61,11 @@ namespace ACMS_Program_Planner
             return 1.0f + (dpi - 96) / 96.0f;
         }
 
+        /// <summary>
+        /// Gets the main application window.
+        /// </summary>
+        public static Window MainWindow => ((App)Current).m_window!;
+
         private Window? m_window;
     }
 }

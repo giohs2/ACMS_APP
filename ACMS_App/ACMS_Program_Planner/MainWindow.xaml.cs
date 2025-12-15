@@ -74,6 +74,10 @@ namespace ACMS_Program_Planner
             {
                 ContentFrame.Navigate(typeof(RFIDPage));
             }
+            else if (args.SelectedItemContainer.Tag.ToString() == "QRPage")
+            {
+                ContentFrame.Navigate(typeof(QRPage));
+            }
         }
 
         private bool TrySetSystemBackdrop()

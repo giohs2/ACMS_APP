@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="ACMS_Program_Planner.QRPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:ACMS_Program_Planner"
+    xmlns:models="using:ACMS_Program_Planner.Models"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="using:System"
+    mc:Ignorable="d">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <StackPanel Grid.Row="0" Margin="20,20,20,0">
+            <TextBlock Text="QR Code Generator" Style="{StaticResource TitleTextBlockStyle}" Margin="10,10,10,10" VerticalAlignment="Center" />
+        </StackPanel>
+
+        <!-- Status Bar -->
+        <TextBlock x:Name="StatusTextBlock" Grid.Row="1" 
+                   Text="Select a service plan and unit to generate QR code" Margin="20,10,20,10"/>
+
+        <!-- Main Content -->
+        <Grid Grid.Row="2" x:Name="ContentGrid">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.25*" />
+                <ColumnDefinition Width="0.35*" />
+                <ColumnDefinition Width="0.4*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Left Column: Service Plans -->
+            <Grid Grid.Column="0" Margin="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0" Margin="0,0,0,10">
+                    <TextBlock Text="Choose Service Plan" VerticalAlignment="Center" Style="{StaticResource SubtitleTextBlockStyle}" Margin="10,0,0,0" />
+                </Grid>
+                <ListView Grid.Row="1" x:Name="PlansListView" SelectionChanged="PlansListView_SelectionChanged" ItemsSource="{x:Bind ServicePlans}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="models:ServicePlanItem">
+                            <StackPanel Margin="0, 5, 0, 5">
+                                <TextBlock Text="{x:Bind sys:String.Format('Plan Id: {0}', Id)}" FontWeight="Bold" />
+                                <TextBlock Text="{x:Bind sys:String.Format('Name: {0}', Name), Mode=OneWay}" />
+                                <TextBlock Text="{x:Bind sys:String.Format('Flight: {0}', FlightName), Mode=OneWay}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>
+
+            <!-- Middle Column: Units List -->
+            <Border Grid.Column="1" Background="{StaticResource LayerFillColorDefaultBrush}" Margin="8" CornerRadius="8">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="Units" Style="{StaticResource SubtitleTextBlockStyle}" Margin="16,10,16,10" />
+
+                    <ListView Grid.Row="1" x:Name="UnitsListView" ItemsSource="{x:Bind RFIDUnits}" SelectionChanged="UnitsListView_SelectionChanged">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="models:RFIDUnit">
+                                <Grid ColumnSpacing="16" Padding="8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Cycle/Unit:" FontWeight="SemiBold" />
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{x:Bind CycleUnit}" />
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Program:" FontWeight="SemiBold" />
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind ProgramName}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                        <ListView.ItemContainerStyle>
+                            <Style BasedOn="{StaticResource DefaultListViewItemStyle}" TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                    </ListView>
+                </Grid>
+            </Border>
+
+            <!-- Right Column: QR Preview and Actions -->
+            <Border Grid.Column="2" Background="{StaticResource LayerFillColorDefaultBrush}" Margin="8" CornerRadius="8">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="QR Code Preview" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,10" />
+
+                    <!-- QR Code Preview Area -->
+                    <Border Grid.Row="1" 
+                            Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}" 
+                            CornerRadius="4" 
+                            HorizontalAlignment="Center" 
+                            VerticalAlignment="Center"
+                            MinWidth="300"
+                            MinHeight="300">
+                        <Grid>
+                            <!-- Placeholder text when no QR -->
+                            <TextBlock x:Name="PlaceholderText" 
+                                       Text="Select a unit and click 'Generate QR Code'" 
+                                       HorizontalAlignment="Center" 
+                                       VerticalAlignment="Center"
+                                       TextWrapping="Wrap"
+                                       TextAlignment="Center"
+                                       Opacity="0.6"
+                                       Margin="20" />
+                            
+                            <!-- QR Code Image -->
+                            <Image x:Name="QRCodeImage" 
+                                   Stretch="Uniform" 
+                                   MaxWidth="300" 
+                                   MaxHeight="300"
+                                   Visibility="Collapsed" />
+                        </Grid>
+                    </Border>
+
+                    <!-- CSV Preview (collapsed by default, for debugging) -->
+                    <Expander Grid.Row="2" Header="CSV Data Preview" Margin="0,10,0,0" HorizontalAlignment="Stretch">
+                        <TextBox x:Name="CsvPreviewTextBox" 
+                                 IsReadOnly="True" 
+                                 TextWrapping="Wrap" 
+                                 MaxHeight="100"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto" />
+                    </Expander>
+
+                    <!-- Action Buttons -->
+                    <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10" Margin="0,16,0,0">
+                        <Button x:Name="GenerateButton" 
+                                Content="Generate QR Code" 
+                                Click="GenerateButton_Click"
+                                Style="{StaticResource AccentButtonStyle}" />
+                        <Button x:Name="SaveButton" 
+                                Content="Save PNG" 
+                                Click="SaveButton_Click"
+                                IsEnabled="False" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Page>
